@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Revenue Analysis{% endblock %}
+
+{% block content %}
+<div class="card mb-4">
+    <div class="card-header bg-info text-white">
+        <h2 class="mb-0">Revenue by Service Plan - {{ year }}</h2>
+    </div>
+    <div class="card-body">
+
+        {% if revenue_by_plan %}
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped align-middle text-center">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Plan Name</th>
+                        <th>Revenue</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for plan, total in revenue_by_plan %}
+                    <tr>
+                        <td class="fw-semibold">{{ plan }}</td>
+                        <td>${{ total|floatformat:2 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot class="table-light fw-bold">
+                    <tr>
+                        <td>Total</td>
+                        <td>${{ total_revenue|floatformat:2 }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted">No revenue data available for this year.</p>
+        {% endif %}
+
+        <a href="{% url 'dashboard' %}" class="btn btn-secondary mt-3">Back to Dashboard</a>
+
+    </div>
+</div>
+{% endblock %}

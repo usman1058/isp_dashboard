@@ -1,0 +1,604 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Company Expenses{% endblock %}
+
+{% block extra_css %}
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+<style>
+    .expense-card {
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border-radius: 10px;
+        text-align: center;
+        padding: 1.2rem;
+        border: none;
+        height: 100%;
+    }
+
+    .expense-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .expense-card h6 {
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: #6c757d;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .expense-card h2, .expense-card h4 {
+        margin: 0;
+        font-weight: 600;
+    }
+
+    .modal-body {
+        white-space: pre-wrap;
+        line-height: 1.6;
+        padding: 1.5rem;
+    }
+
+    .see-more {
+        color: #007bff;
+        cursor: pointer;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+
+    .see-more:hover {
+        color: #0056b3;
+        text-decoration: underline;
+    }
+
+    .category-table-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .table {
+        font-size: 0.9rem;
+        border-collapse: separate;
+        border-spacing: 0;
+        margin-bottom: 0;
+    }
+
+    .table th {
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+        color: #6c757d;
+        border-top: none;
+        background-color: #f8f9fa;
+    }
+
+    .table td {
+        vertical-align: middle;
+        border-top: 1px solid #f1f3f5;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 123, 255, 0.03);
+    }
+
+    .custom-table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .custom-table tbody td {
+        padding: 0.75rem 1rem;
+    }
+
+    #expensePieChart {
+        max-width: 100%;
+        height: 300px;
+    }
+
+    .card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+
+    .card:hover {
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-header {
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        background-color: #f8f9fa;
+        padding: 1rem 1.5rem;
+    }
+
+    .total-summary {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-top: 2rem;
+        border-left: 4px solid #4e73df;
+    }
+
+    .total-summary h4 {
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        color: #495057;
+    }
+
+    .total-summary-table {
+        width: 100%;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .total-summary-table th,
+    .total-summary-table td {
+        padding: 0.75rem;
+        text-align: left;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .total-summary-table th {
+        font-weight: 500;
+        color: #6c757d;
+        width: 50%;
+    }
+
+    .total-summary-table tr:last-child th,
+    .total-summary-table tr:last-child td {
+        border-bottom: none;
+        font-weight: 600;
+        color: #212529;
+        font-size: 1.1rem;
+    }
+
+    .badge-category {
+        padding: 0.35em 0.65em;
+        font-size: 0.75em;
+        font-weight: 600;
+        border-radius: 0.25rem;
+        background-color: #f1f3f5;
+        color: #495057;
+    }
+
+    .btn-add-expense {
+        background-color: #4e73df;
+        border: none;
+        padding: 0.5rem 1.25rem;
+        font-weight: 500;
+        transition: all 0.3s;
+    }
+
+    .btn-add-expense:hover {
+        background-color: #3a5ccc;
+        transform: translateY(-2px);
+    }
+
+    .amount-cell {
+        font-family: 'Roboto Mono', monospace;
+        font-weight: 600;
+    }
+
+    .table-footer-total {
+        background-color: #f8f9fa;
+        font-weight: 600;
+    }
+
+    .category-badge {
+        font-size: 0.75rem;
+        padding: 0.35em 0.65em;
+        border-radius: 50rem;
+    }
+
+    .expense-date {
+        white-space: nowrap;
+        color: #6c757d;
+        font-size: 0.85rem;
+    }
+
+    .chart-container {
+        position: relative;
+        height: 300px;
+    }
+
+    .section-title {
+        position: relative;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .section-title:after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 50px;
+        height: 3px;
+        background: linear-gradient(90deg, #4e73df, #224abe);
+        border-radius: 3px;
+    }
+
+    .table-responsive {
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .table-container {
+        max-height: 500px;
+        overflow-y: auto;
+    }
+
+    @media (max-width: 768px) {
+        .category-table-container {
+            grid-template-columns: 1fr;
+        }
+        
+        .total-summary-table {
+            max-width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4 animate__animated animate__fadeIn">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="fw-bold text-dark mb-1">Company Expenses</h1>
+            <p class="text-muted mb-0">Track and manage all company expenditures</p>
+        </div>
+        <button class="btn btn-add-expense text-white hover-scale" data-bs-toggle="collapse" data-bs-target="#addExpenseForm">
+            <i class="bi bi-plus-circle me-1"></i> Add Expense
+        </button>
+    </div>
+
+    <!-- Add Expense Form -->
+    <div class="collapse mb-5" id="addExpenseForm">
+        <div class="card shadow border-0 animate__animated animate__fadeInUp">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold text-primary">New Expense Entry</h5>
+                <button type="button" class="btn-close" data-bs-toggle="collapse" data-bs-target="#addExpenseForm" aria-label="Close"></button>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <div class="d-flex justify-content-end mt-3">
+                        <button type="submit" class="btn btn-primary px-4">Submit Expense</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Cards & Chart Row -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-pie-chart-fill text-primary me-2"></i>
+                        Expense Distribution
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="expensePieChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="row g-3">
+                <div class="col-12">
+                    <div class="card expense-card bg-gradient-primary text-white">
+                        <div class="card-body">
+                            <h6>Total Expenses</h6>
+                            <h2 class="fw-bold">₹{{ total_expense|floatformat:2 }}</h2>
+                            <p class="small mb-0">All categories combined</p>
+                        </div>
+                    </div>
+                </div>
+                {% for cat in category_totals %}
+                <div class="col-md-6">
+                    <a href="#cat-{{ cat.category__name|slugify }}" class="text-decoration-none">
+                        <div class="card expense-card">
+                            <div class="card-body">
+                                <h6>{{ cat.category__name }}</h6>
+                                <h4 class="text-primary fw-semibold">₹{{ cat.total|floatformat:2 }}</h4>
+                                <p class="small text-muted mb-0">{{ cat.percentage|floatformat:1 }}% of total</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Full Expense Table -->
+    <div class="card mb-5">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold">
+                <i class="bi bi-table me-2"></i>All Expenses
+            </h5>
+            <div class="d-flex align-items-center">
+                <span class="me-2 small text-muted">Filter:</span>
+                <select id="categoryFilter" class="form-select form-select-sm w-auto">
+                    <option value="all">All Categories</option>
+                    {% for cat in category_totals %}
+                    <option value="{{ cat.category__name }}">{{ cat.category__name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <div class="table-container">
+                <table class="table custom-table table-hover">
+                    <thead class="sticky-top">
+                        <tr>
+                            <th>Date</th>
+                            <th>Category</th>
+                            <th>Description</th>
+                            <th class="text-end">Amount (₹)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for expense in expenses %}
+                        <tr>
+                            <td class="expense-date">{{ expense.date|date:"M d, Y" }}</td>
+                            <td><span class="badge category-badge" style="background-color: {{ expense.category.color|default:'#f1f3f5' }}">{{ expense.category.name }}</span></td>
+                            <td>
+                                {% if expense.description|length > 50 %}
+                                    <span class="see-more" data-bs-toggle="modal" data-bs-target="#descModal" data-desc="{{ expense.description }}">
+                                        {{ expense.description|truncatechars:50 }}
+                                    </span>
+                                {% else %}
+                                    {{ expense.description|default:"-" }}
+                                {% endif %}
+                            </td>
+                            <td class="text-end amount-cell">{{ expense.amount|floatformat:2 }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot class="table-footer-total">
+                        <tr>
+                            <th colspan="3" class="text-end">Total</th>
+                            <th class="text-end">{{ total_expense|floatformat:2 }}</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Expense Tables by Category -->
+    <h4 class="fw-bold mb-4 section-title">Expenses by Category</h4>
+    <div class="category-table-container">
+        {% for cat in category_totals %}
+        <div id="cat-{{ cat.category__name|slugify }}" class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold">
+                    <i class="bi bi-tag-fill me-2" style="color: {{ cat.color }}"></i>{{ cat.category__name }}
+                </h5>
+                <span class="badge bg-primary rounded-pill">₹{{ cat.total|floatformat:2 }}</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Description</th>
+                            <th class="text-end">Amount (₹)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for expense in expenses %}
+                            {% if expense.category.name == cat.category__name %}
+                            <tr>
+                                <td class="expense-date">{{ expense.date|date:"M d, Y" }}</td>
+                                <td>
+                                    {% if expense.description|length > 40 %}
+                                        <span class="see-more" data-bs-toggle="modal" data-bs-target="#descModal" data-desc="{{ expense.description }}">
+                                            {{ expense.description|truncatechars:40 }}
+                                        </span>
+                                    {% else %}
+                                        {{ expense.description|default:"-" }}
+                                    {% endif %}
+                                </td>
+                                <td class="text-end amount-cell">{{ expense.amount|floatformat:2 }}</td>
+                            </tr>
+                            {% endif %}
+                        {% endfor %}
+                    </tbody>
+                    <tfoot class="table-footer-total">
+                        <tr>
+                            <th colspan="2" class="text-end">Category Total</th>
+                            <th class="text-end">{{ cat.total|floatformat:2 }}</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Summary Section -->
+    <div class="total-summary">
+        <h4><i class="bi bi-graph-up me-2"></i>Expense Summary</h4>
+        <div class="table-responsive">
+            <table class="total-summary-table">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th class="text-end">Amount</th>
+                        <th class="text-end">Percentage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cat in category_totals %}
+                    <tr>
+                        <th>{{ cat.category__name }}</th>
+                        <td class="text-end">₹{{ cat.total|floatformat:2 }}</td>
+                        <td class="text-muted text-end">{{ cat.percentage|floatformat:1 }}%</td>
+                    </tr>
+                    {% endfor %}
+                    <tr class="border-top">
+                        <th>Total Expenses</th>
+                        <td class="text-end fw-bold">₹{{ total_expense|floatformat:2 }}</td>
+                        <td class="text-end fw-bold">100%</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Description Modal -->
+<div class="modal fade" id="descModal" tabindex="-1" aria-labelledby="descModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="descModalLabel">Expense Description</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    AOS.init();
+
+    // Generate random colors for categories
+    const categoryColors = [
+        '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b', 
+        '#858796', '#5a5c69', '#3a3b45', '#2e59d9', '#17a673'
+    ];
+    
+    // Assign colors to categories
+    const categoryElements = document.querySelectorAll('.category-table-container .card');
+    categoryElements.forEach((card, index) => {
+        const color = categoryColors[index % categoryColors.length];
+        const icon = card.querySelector('.bi-tag-fill');
+        if (icon) icon.style.color = color;
+        
+        // Add color to category badge in the card header
+        const badge = card.querySelector('.card-header .badge');
+        if (badge) {
+            badge.style.backgroundColor = color;
+        }
+    });
+
+    // Assign colors to category badges in the main table
+    document.querySelectorAll('.category-badge').forEach((badge, index) => {
+        const categoryName = badge.textContent.trim();
+        const categoryIndex = Array.from(document.querySelectorAll('.category-table-container .card h5'))
+            .findIndex(el => el.textContent.includes(categoryName));
+        
+        if (categoryIndex >= 0) {
+            badge.style.backgroundColor = categoryColors[categoryIndex % categoryColors.length];
+            badge.style.color = '#fff';
+        }
+    });
+
+    // Pie Chart Configuration
+    const ctx = document.getElementById('expensePieChart').getContext('2d');
+    const pieChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: [{% for cat in category_totals %}'{{ cat.category__name }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
+            datasets: [{
+                data: [{% for cat in category_totals %}{{ cat.total }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+                backgroundColor: categoryColors,
+                borderWidth: 0,
+                hoverOffset: 10
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '70%',
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: {
+                        boxWidth: 12,
+                        padding: 20,
+                        usePointStyle: true,
+                        pointStyle: 'circle',
+                        font: {
+                            family: 'inherit'
+                        }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.raw || 0;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = Math.round((value / total) * 100);
+                            return `${label}: ₹${value.toFixed(2)} (${percentage}%)`;
+                        }
+                    },
+                    bodyFont: {
+                        family: 'inherit'
+                    }
+                }
+            }
+        }
+    });
+
+    // Description Modal
+    document.querySelectorAll(".see-more").forEach(el => {
+        el.addEventListener("click", function () {
+            const desc = this.getAttribute("data-desc");
+            document.querySelector("#descModal .modal-body").textContent = desc;
+        });
+    });
+
+    // Category Filter
+    document.getElementById('categoryFilter').addEventListener('change', function() {
+        const filterValue = this.value.toLowerCase();
+        const rows = document.querySelectorAll('.custom-table tbody tr');
+        
+        rows.forEach(row => {
+            const category = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+            if (filterValue === 'all' || category.includes(filterValue)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        // Update footer total based on filtered rows
+        let filteredTotal = 0;
+        document.querySelectorAll('.custom-table tbody tr').forEach(row => {
+            if (row.style.display !== 'none') {
+                const amount = parseFloat(row.querySelector('td:nth-child(4)').textContent);
+                filteredTotal += amount;
+            }
+        });
+        
+        document.querySelector('.custom-table tfoot th:nth-child(4)').textContent = filteredTotal.toFixed(2);
+    });
+</script>
+{% endblock %}6

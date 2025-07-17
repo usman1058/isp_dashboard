@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Delete Service Plan{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card border-danger">
+        <div class="card-header bg-danger text-white">
+            <h2>Confirm Deletion</h2>
+        </div>
+        <div class="card-body">
+            <p>Are you sure you want to delete the "{{ serviceplan.name }}" service plan?</p>
+            
+            <div class="alert alert-warning">
+                <strong>Warning:</strong> This action cannot be undone. Any customers using this plan will need to be assigned a different plan.
+            </div>
+            
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">
+                    <i class="bi bi-trash"></i> Confirm Delete
+                </button>
+                <a href="{% url 'service_plan_detail' serviceplan.pk %}" class="btn btn-secondary">
+                    <i class="bi bi-x-circle"></i> Cancel
+                </a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block title %}Payment Challan{% endblock %}
+
+{% block content %}
+<div class="container mt-5" id="challan-content">
+    <div class="card shadow border-0 p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="fw-bold text-primary mb-0">
+                <i class="bi bi-receipt me-2"></i> Payment Receipt
+            </h3>
+            <button class="btn btn-outline-primary" onclick="window.print()">
+                <i class="bi bi-printer-fill me-1"></i> Print
+            </button>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <h5 class="fw-bold text-secondary">Customer Info</h5>
+                <p class="mb-1"><strong>Name:</strong> {{ payment.customer.first_name }} {{ payment.customer.last_name }}</p>
+                <p class="mb-1"><strong>Email:</strong> {{ payment.customer.email|default:"-" }}</p>
+                <p class="mb-1"><strong>Phone:</strong> {{ payment.customer.phone|default:"-" }}</p>
+                <p class="mb-1"><strong>Address:</strong> {{ payment.customer.address|linebreaksbr|default:"-" }}</p>
+                <p class="mb-1"><strong>Service Plan:</strong> {{ payment.customer.service_plan.name }} (₹{{ payment.customer.service_plan.price }})</p>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <h5 class="fw-bold text-secondary">Receipt Info</h5>
+                <p class="mb-1"><strong>Challan #:</strong> {{ payment.pk|stringformat:"06d" }}</p>
+                <p class="mb-1"><strong>Date:</strong> {{ payment.payment_date|date:"F j, Y" }}</p>
+                <p class="mb-1"><strong>Method:</strong> {{ payment.get_method_display }}</p>
+                <p class="mb-1"><strong>Received By:</strong> {{ payment.received_by.get_full_name|default:payment.received_by.username }}</p>
+            </div>
+        </div>
+
+        <hr>
+
+        <div class="row">
+            <div class="col-md-12">
+                <table class="table table-bordered">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Description</th>
+                            <th class="text-end">Amount (₹)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>Payment for Internet Service ({{ payment.customer.service_plan.name }})</td>
+                            <td class="text-end">{{ payment.amount }}</td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr class="table-secondary">
+                            <th colspan="2" class="text-end">Total</th>
+                            <th class="text-end">₹{{ payment.amount }}</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+
+        {% if payment.notes %}
+        <div class="alert alert-secondary mt-3">
+            <strong>Notes:</strong><br>
+            {{ payment.notes|linebreaks }}
+        </div>
+        {% endif %}
+
+        <p class="text-muted mt-4 mb-0 text-center">
+            This is a system-generated challan. No signature required.
+        </p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        #challan-content, #challan-content * {
+            visibility: visible;
+        }
+        #challan-content {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+        }
+
+        button, .btn, .navbar {
+            display: none !important;
+        }
+
+        table {
+            page-break-inside: auto;
+        }
+
+        tr {
+            page-break-inside: avoid;
+            page-break-after: auto;
+        }
+    }
+</style>
+{% endblock %}

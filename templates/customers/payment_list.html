@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Payment Records{% endblock %}
+
+{% block content %}
+<div class="container animate__animated animate__fadeIn">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="fw-bold text-dark">
+            <i class="bi bi-cash-coin text-success me-2"></i> Payments
+        </h1>
+        <a href="{% url 'payment_create' %}" class="btn btn-success hover-scale">
+            <i class="bi bi-plus-circle me-1"></i> Add Payment
+        </a>
+    </div>
+
+    <!-- Filter Card -->
+    <div class="card border-0 shadow-lg mb-4 animate__animated animate__fadeInUp">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center border-bottom">
+            <h5 class="mb-0 fw-bold text-dark">
+                <i class="bi bi-funnel-fill text-success me-2"></i> Filter Payments
+            </h5>
+            <button class="btn btn-sm btn-outline-success" type="button" data-bs-toggle="collapse" 
+                    data-bs-target="#filterCollapse" aria-expanded="true" aria-controls="filterCollapse">
+                <i class="bi bi-chevron-down"></i>
+            </button>
+        </div>
+        <div class="collapse show" id="filterCollapse">
+            <div class="card-body">
+                <form method="get" class="form-inline">
+                    <div class="row g-3">
+                        <div class="col-md-3">{{ filter_form.customer|as_crispy_field }}</div>
+                        <div class="col-md-3">{{ filter_form.method|as_crispy_field }}</div>
+                        <div class="col-md-3">{{ filter_form.received_by|as_crispy_field }}</div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold small text-muted">Amount Range</label>
+                            <div class="input-group">
+                                <input type="number" name="amount_min" class="form-control form-control-sm" placeholder="Min" value="{{ filter.form.amount_min.value|default_if_none:'' }}">
+                                <input type="number" name="amount_max" class="form-control form-control-sm" placeholder="Max" value="{{ filter.form.amount_max.value|default_if_none:'' }}">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold small text-muted">Date Range</label>
+                            <div class="input-group">
+                                <input type="date" name="payment_date_after" class="form-control form-control-sm" value="{{ filter.form.payment_date_after.value|default_if_none:'' }}">
+                                <input type="date" name="payment_date_before" class="form-control form-control-sm" value="{{ filter.form.payment_date_before.value|default_if_none:'' }}">
+                            </div>
+                        </div>
+                        <div class="col-md-2 align-self-end">
+                            <button type="submit" class="btn btn-sm btn-success w-100 hover-scale">
+                                <i class="bi bi-filter me-1"></i> Filter
+                            </button>
+                        </div>
+                        <div class="col-md-2 align-self-end">
+                            <a href="{% url 'payment_list' %}" class="btn btn-sm btn-outline-secondary w-100 hover-scale">
+                                <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Table -->
+    <div class="card border-0 shadow-lg animate__animated animate__fadeInUp">
+        <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold text-dark">
+                <i class="bi bi-table text-success me-2"></i> Payment Records
+            </h5>
+            <span class="badge bg-success rounded-pill animate__animated animate__pulse animate__infinite" style="animation-duration: 2s">
+                {{ payments.paginator.count }} records
+            </span>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Date</th>
+                            <th>Customer</th>
+                            <th>Amount</th>
+                            <th>Method</th>
+                            <th>Received By</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for payment in payments %}
+                        <tr class="animate__animated animate__fadeIn" style="animation-delay: {{ forloop.counter0|divisibleby:2|yesno:'0.1s,0.2s' }}">
+                            <td>{{ payment.payment_date|date:"M d, Y" }}</td>
+                            <td>{{ payment.customer }}</td>
+                            <td class="fw-bold">₹{{ payment.amount }}</td>
+                            <td>{{ payment.get_method_display }}</td>
+                            <td>{{ payment.received_by.get_full_name|default:payment.received_by.username }}</td>
+                            <td class="text-end">
+                                <div class="btn-group">
+                                    <a href="{% url 'payment_detail' payment.pk %}" class="btn btn-sm btn-outline-info hover-scale" title="Details">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="{% url 'payment_update' payment.pk %}" class="btn btn-sm btn-outline-warning hover-scale" title="Edit">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a href="{% url 'payment_delete' payment.pk %}" class="btn btn-sm btn-outline-danger hover-scale" title="Delete">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-5">
+                                <div class="mb-3 animate__animated animate__bounceIn">
+                                    <i class="bi bi-receipt text-muted" style="font-size: 3rem;"></i>
+                                </div>
+                                <h5 class="text-muted">No payments found</h5>
+                                <p class="text-muted">Try adjusting filters or add new payments.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {% if is_paginated %}
+        <div class="card-footer bg-white border-top-0">
+            {% include 'includes/pagination.html' %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

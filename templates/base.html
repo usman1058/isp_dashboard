@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ISP Management - {% block title %}{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Add these to your base.html or in the head section -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+
+    {% block extra_css %}{% endblock %}
+    <style>
+        /* Custom CSS for enhanced dashboard */
+        :root {
+            --primary: #4e73df;
+            --secondary: #858796;
+            --success: #1cc88a;
+            --info: #36b9cc;
+            --warning: #f6c23e;
+            --danger: #e74a3b;
+            --light: #f8f9fc;
+            --dark: #5a5c69;
+        }
+
+        .bg-gradient-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, #224abe 100%);
+            border: none;
+        }
+
+        .bg-gradient-success {
+            background: linear-gradient(135deg, var(--success) 0%, #17a673 100%);
+            border: none;
+        }
+
+        .bg-gradient-danger {
+            background: linear-gradient(135deg, var(--danger) 0%, #be2617 100%);
+            border: none;
+        }
+
+        .bg-gradient-info {
+            background: linear-gradient(135deg, var(--info) 0%, #258391 100%);
+            border: none;
+        }
+
+        .hover-scale {
+            transition: all 0.2s ease;
+        }
+
+        .hover-scale:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .card {
+            border-radius: 0.5rem;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .avatar {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2rem;
+            height: 2rem;
+        }
+
+        .avatar-sm {
+            width: 1.75rem;
+            height: 1.75rem;
+            font-size: 0.75rem;
+        }
+
+        .avatar-text {
+            font-weight: 600;
+            color: inherit;
+        }
+
+        .progress {
+            border-radius: 0.25rem;
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .progress-bar {
+            border-radius: 0.25rem;
+        }
+
+        .table th {
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+            color: var(--secondary);
+        }
+
+        .animate__delay-1s {
+            animation-delay: 1s;
+        }
+
+        .animate__delay-2s {
+            animation-delay: 2s;
+        }
+    </style>
+
+    <style>
+        /* Custom CSS for animations and hover effects */
+        .hover-scale {
+            transition: transform 0.2s ease;
+        }
+
+        .hover-scale:hover {
+            transform: scale(1.05);
+        }
+
+        .card {
+            transition: box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .progress-bar {
+            transition: width 1s ease;
+        }
+
+        .animate__animated {
+            animation-duration: 0.6s;
+        }
+    </style>
+
+    <style>
+        .form-check {
+            margin-bottom: 0.5rem;
+        }
+
+        .form-check-label {
+            margin-left: 0.5rem;
+        }
+
+        .card .card {
+            margin-bottom: 1rem;
+        }
+    </style>
+
+
+    <style>
+        .avatar {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .avatar-xl {
+            width: 3.5rem;
+            height: 3.5rem;
+            font-size: 1.25rem;
+        }
+
+        .avatar-text {
+            font-weight: 600;
+            color: inherit;
+        }
+
+        .hover-scale {
+            transition: all 0.2s ease;
+        }
+
+        .hover-scale:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .card {
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+
+        .breadcrumb {
+            background-color: transparent;
+            padding: 0;
+        }
+
+        .list-group-item {
+            padding-left: 0;
+            padding-right: 0;
+            background-color: transparent;
+        }
+    </style>
+    <style>
+    /* Base styles */
+    :root {
+        --primary-color: #2563eb;
+        --primary-dark: #1e40af;
+        --primary-light: #3b82f6;
+        --accent-color: #10b981;
+        --text-light: #f8fafc;
+        --text-dark: #1e293b;
+        --bg-dark: #0f172a;
+        --bg-light: #ffffff;
+        --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+     .navbar {
+        position: sticky;
+        top: 0;
+        z-index: 1030;
+    }
+
+    /* Navbar container */
+    nav {
+        background-color: var(--bg-dark);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 
+                    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        padding: 0.75rem 1rem;
+        transition: var(--transition);
+    }
+
+    /* Logo styles */
+    .logo-container {
+        display: flex;
+        align-items: center;
+        transition: var(--transition);
+    }
+
+    .logo-container i {
+        font-size: 1.5rem;
+        color: var(--primary-light);
+        transition: var(--transition);
+    }
+
+    .brand-text {
+        font-weight: 600;
+        font-size: 1.25rem;
+        color: var(--text-light);
+    }
+
+    .brand-highlight {
+        color: var(--accent-color);
+    }
+
+    .navbar-brand:hover .logo-container {
+        transform: translateY(-2px);
+    }
+
+    .navbar-brand:hover i {
+        color: var(--accent-color);
+    }
+
+    /* Nav items */
+    .nav-item {
+        position: relative;
+        margin: 0 0.5rem;
+    }
+
+    .nav-link {
+        display: flex;
+        align-items: center;
+        color: var(--text-light);
+        padding: 0.75rem 1rem;
+        font-weight: 500;
+        transition: var(--transition);
+    }
+
+    .nav-link i {
+        font-size: 1.1rem;
+        margin-right: 0.5rem;
+        transition: var(--transition);
+    }
+
+    .nav-underline {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background-color: var(--accent-color);
+        transition: var(--transition);
+    }
+
+    .nav-link:hover {
+        color: var(--accent-color);
+    }
+
+    .nav-link:hover i {
+        transform: scale(1.1);
+    }
+
+    .nav-link:hover .nav-underline {
+        width: 100%;
+    }
+
+    /* Dropdown styles */
+    .dropdown-menu {
+        background-color: var(--bg-dark);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 0.5rem;
+        padding: 0.5rem 0;
+        margin-top: 0.5rem;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 
+                    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        animation: fadeIn 0.2s ease-out;
+    }
+
+    .dropdown-item {
+        color: var(--text-light);
+        padding: 0.5rem 1.5rem;
+        transition: var(--transition);
+    }
+
+    .dropdown-item:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+        color: var(--accent-color);
+    }
+
+    .dropdown-item i {
+        width: 1.25rem;
+        text-align: center;
+    }
+
+    /* User section */
+    .user-section {
+        display: flex;
+        align-items: center;
+        margin-left: 1rem;
+    }
+
+    .user-greeting {
+        display: flex;
+        align-items: center;
+        color: var(--text-light);
+        margin-right: 1.5rem;
+        font-weight: 500;
+        transition: var(--transition);
+    }
+
+    .user-greeting:hover {
+        color: var(--accent-color);
+    }
+
+    .user-greeting i {
+        font-size: 1.25rem;
+    }
+
+    /* Logout button */
+    .logout-btn {
+        background-color: transparent;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: var(--text-light);
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        display: flex;
+        align-items: center;
+        font-weight: 500;
+        transition: var(--transition);
+    }
+
+    .logout-btn:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+        border-color: var(--accent-color);
+        color: var(--accent-color);
+        transform: translateY(-1px);
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Mobile responsiveness */
+    @media (max-width: 992px) {
+        .navbar-collapse {
+            padding: 1rem 0;
+            background-color: var(--bg-dark);
+            margin-top: 0.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-item {
+            margin: 0.25rem 0;
+        }
+
+        .user-section {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .user-greeting {
+            margin-bottom: 1rem;
+            margin-right: 0;
+        }
+    }
+    /* Payment card styling */
+.card.bg-gradient-info {
+    background: linear-gradient(135deg, #17a2b8, #2c3e50);
+}
+
+.progress {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+.progress-bar {
+    border-radius: 3px;
+}
+
+.expected-total {
+    font-size: 1.2rem;
+}
+</style>
+
+</head>
+
+<body>
+<!-- Bulk Processing Modal -->
+<div class="modal fade" id="bulkProcessingModal" tabindex="-1" aria-labelledby="bulkProcessingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="bulkProcessingModalLabel">
+                    <i class="bi bi-gear-wide-connected"></i> Bulk Reminder Processing
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="bulkResultsContainer">
+                    <!-- Results will be inserted here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Toast Container -->
+<div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-3"></div>
+    <!-- 🧩 Modal -->
+    <div class="modal fade" id="reminderManagerModal" tabindex="-1" aria-labelledby="reminderManagerLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="reminderManagerLabel">Scheduled Reminders</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="reminder-list-container">
+                    <p>Loading reminders...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+<nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+    <div class="container">
+        <!-- Logo with smooth animation -->
+        <a class="navbar-brand" href="{% url 'dashboard' %}">
+            <div class="logo-container">
+                <i class="bi bi-router me-2"></i>
+                <span class="brand-text">ISP<span class="brand-highlight">Manager</span></span>
+            </div>
+        </a>
+
+        <!-- Mobile toggle button -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarMain">
+            <ul class="navbar-nav me-auto">
+                <!-- Main nav items -->
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'customer_list' %}">
+                        <i class="bi bi-people me-1"></i>
+                        <span>Customers</span>
+                        <div class="nav-underline"></div>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'payment_list' %}">
+                        <i class="bi bi-credit-card me-1"></i>
+                        <span>Payments</span>
+                        <div class="nav-underline"></div>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'payment_status' %}">
+                        <i class="bi bi-check-circle me-1"></i>
+                        <span>Status</span>
+                        <div class="nav-underline"></div>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'service_plan_list' %}">
+                        <i class="bi bi-speedometer2 me-1"></i>
+                        <span>Plans</span>
+                        <div class="nav-underline"></div>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'expense_dashboard' %}">
+                        <i class="bi bi-pie-chart me-1"></i>
+                        <span>Expenses</span>
+                        <div class="nav-underline"></div>
+                    </a>
+                </li>
+
+                <!-- Reports dropdown -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="reportsDropdown" data-bs-toggle="dropdown">
+                        <i class="bi bi-bar-chart me-1"></i>
+                        <span>Reports</span>
+                        <div class="nav-underline"></div>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{% url 'monthly_payment_report' %}"><i class="bi bi-wallet2 me-2"></i>Payment Report</a></li>
+                        <li><a class="dropdown-item" href="{% url 'expense_report' %}"><i class="bi bi-cash-stack me-2"></i>Expense Report</a></li>
+                        <li><a class="dropdown-item" href="{% url 'customer_growth_report' %}"><i class="bi bi-graph-up me-2"></i>Customer Growth</a></li>
+                    </ul>
+                </li>
+            </ul>
+
+            <!-- User section -->
+            <div class="user-section">
+                <div class="user-greeting">
+                    <i class="bi bi-person-circle me-2"></i>
+                    <span>{{ request.user.username }}</span>
+                </div>
+                {% if user.is_authenticated %}
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-btn">
+                        <i class="bi bi-box-arrow-right me-1"></i>
+                        <span>Logout</span>
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</nav>
+
+
+
+    <div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 1055;"></div>
+
+    <div class="container mt-4">
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<!-- jQuery (if not already loaded) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- SweetAlert for beautiful alerts -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    // Toast notification function
+    function showToast(message, type = 'success') {
+        const toast = document.createElement('div');
+        toast.className = `toast show position-fixed bottom-0 end-0 m-3 bg-${type} text-white`;
+        toast.innerHTML = `
+            <div class="toast-body d-flex align-items-center">
+                <span>${message}</span>
+                <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="toast"></button>
+            </div>
+        `;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 5000);
+    }
+
+    // Get CSRF token
+    function getCsrfToken() {
+        return document.querySelector('[name=csrfmiddlewaretoken]').value;
+    }
+
+    // Handle instant send (opens WhatsApp immediately)
+    function handleInstantSend(btn, customerId, dueDate) {
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+        btn.disabled = true;
+
+        fetch('/ajax_send_reminder/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': getCsrfToken()
+            },
+            body: `customer_id=${customerId}&due_date=${dueDate}&action_type=instant`
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => {
+                    throw new Error(err.message || 'Failed to prepare message');
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                if (data.url) {
+                    window.open(data.url, '_blank');
+                    showToast('WhatsApp opened with your message');
+                } else {
+                    showToast(data.msg);
+                }
+            } else {
+                throw new Error(data.msg || 'Failed to prepare message');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast(error.message, 'danger');
+        })
+        .finally(() => {
+            btn.innerHTML = originalHtml;
+            btn.disabled = false;
+        });
+    }
+
+    // Handle automatic background send
+    function handleAutoSend(btn, customerId, dueDate) {
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+        btn.disabled = true;
+
+        Swal.fire({
+            title: 'Auto Send Reminder',
+            html: `<div class="text-start">
+                <p>This will send the message automatically in about 3 minutes.</p>
+                <div class="alert alert-info p-2 mt-2 small">
+                    <i class="bi bi-info-circle"></i> Please keep WhatsApp Web open in your default browser
+                </div>
+            </div>`,
+            icon: 'info',
+            showCancelButton: true,
+            confirmButtonText: 'Confirm Send',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                return fetch('/ajax_send_reminder/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': getCsrfToken()
+                    },
+                    body: `customer_id=${customerId}&due_date=${dueDate}&action_type=automatic`
+                });
+            }
+            return Promise.reject('Cancelled by user');
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => {
+                    throw new Error(err.message || 'Failed to send automatically');
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                showToast('Message will be sent automatically shortly');
+            } else {
+                throw new Error(data.msg || 'Failed to send automatically');
+            }
+        })
+        .catch(error => {
+            if (error !== 'Cancelled by user') {
+                console.error('Error:', error);
+                showToast(error.message, 'danger');
+            }
+        })
+        .finally(() => {
+            btn.innerHTML = originalHtml;
+            btn.disabled = false;
+        });
+    }
+
+    // Handle scheduling
+    function handleSchedule(btn, customerId, dueDate) {
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+        btn.disabled = true;
+
+        Swal.fire({
+            title: 'Schedule Reminder',
+            html: `
+                <div class="text-start">
+                    <p>Select date and time for the reminder (must be at least 30 minutes from now)</p>
+                    <div class="mb-3">
+                        <label for="scheduleDate" class="form-label">Date</label>
+                        <input type="date" id="scheduleDate" class="form-control" value="${dueDate}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="scheduleTime" class="form-label">Time</label>
+                        <input type="time" id="scheduleTime" class="form-control" value="10:00">
+                    </div>
+                </div>
+            `,
+            icon: 'info',
+            showCancelButton: true,
+            confirmButtonText: 'Schedule',
+            cancelButtonText: 'Cancel',
+            preConfirm: () => {
+                const date = document.getElementById('scheduleDate').value;
+                const time = document.getElementById('scheduleTime').value;
+                if (!date || !time) {
+                    Swal.showValidationMessage('Please select both date and time');
+                    return false;
+                }
+                return `${date} ${time}`;
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                return fetch('/ajax_send_reminder/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': getCsrfToken()
+                    },
+                    body: `customer_id=${customerId}&due_date=${dueDate}&action_type=schedule&send_time=${result.value}`
+                });
+            }
+            return Promise.reject('Cancelled by user');
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => {
+                    throw new Error(err.message || 'Failed to schedule reminder');
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                showToast(`Reminder scheduled for ${data.scheduled_time}`);
+            } else {
+                throw new Error(data.msg || 'Failed to schedule reminder');
+            }
+        })
+        .catch(error => {
+            if (error !== 'Cancelled by user') {
+                console.error('Error:', error);
+                showToast(error.message, 'danger');
+            }
+        })
+        .finally(() => {
+            btn.innerHTML = originalHtml;
+            btn.disabled = false;
+        });
+    }
+
+    // Set up event listeners
+    document.querySelectorAll('.instant-send-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            handleInstantSend(this, this.dataset.customerId, this.dataset.dueDate);
+        });
+    });
+
+    document.querySelectorAll('.auto-send-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            handleAutoSend(this, this.dataset.customerId, this.dataset.dueDate);
+        });
+    });
+
+    document.querySelectorAll('.schedule-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            handleSchedule(this, this.dataset.customerId, this.dataset.dueDate);
+        });
+    });
+
+    // Bulk send handlers
+    document.getElementById('bulkInstantSend')?.addEventListener('click', function() {
+        const filter = document.getElementById('reminderFilter').value;
+        // Implement bulk instant send logic here
+    });
+
+    document.getElementById('bulkAutoSend')?.addEventListener('click', function() {
+        const filter = document.getElementById('reminderFilter').value;
+        // Implement bulk auto send logic here
+    });
+});
+</script>
+    <script>
+        function showToast(message, type = "info") {
+            const toast = document.createElement("div");
+            toast.className = `toast align-items-center text-white bg-${type} border-0 show`;
+            toast.style.minWidth = "250px";
+            toast.role = "alert";
+            toast.innerHTML = `
+        <div class="d-flex">
+            <div class="toast-body">${message}</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    `;
+            document.getElementById("toast-container").appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.remove("show");
+                toast.remove();
+            }, 5000);
+        }
+    </script>
+<script>
+// Helper functions
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function showToast(message, type = 'success') {
+    const toastContainer = document.getElementById('toast-container') || document.body;
+    const toast = document.createElement('div');
+    toast.className = `toast show align-items-center text-white bg-${type} border-0`;
+    toast.style.minWidth = "250px";
+    toast.role = "alert";
+    toast.innerHTML = `
+        <div class="d-flex">
+            <div class="toast-body">${message}</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    `;
+    toastContainer.appendChild(toast);
+    setTimeout(() => toast.remove(), 5000);
+}
+
+</script>
+    <script>
+
+        // Toast notification function
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast show position-fixed bottom-0 end-0 m-3`;
+            toast.innerHTML = `
+        <div class="toast-header bg-${type} text-white">
+            <strong class="me-auto">Notification</strong>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+        </div>
+        <div class="toast-body">${message}</div>
+    `;
+            document.body.appendChild(toast);
+
+            // Auto-remove after 3 seconds
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        // Handle reminder button clicks
+    </script>
+
+
+    <script>
+        $(document).ready(function () {
+            // Count-up animation for statistics
+            $('.count-up').each(function () {
+                var $this = $(this);
+                var target = $this.data('count');
+                var count = 0;
+                var increment = target / 30;
+
+                var timer = setInterval(function () {
+                    count += increment;
+                    if (count >= target) {
+                        clearInterval(timer);
+                        count = target;
+                    }
+                    $this.text(Math.floor(count));
+                }, 30);
+            });
+
+            $('.count-up-currency').each(function () {
+                var $this = $(this);
+                var target = $this.data('count');
+                var count = 0;
+                var increment = target / 30;
+
+                var timer = setInterval(function () {
+                    count += increment;
+                    if (count >= target) {
+                        clearInterval(timer);
+                        count = target;
+                    }
+                    $this.text('$' + Math.floor(count).toLocaleString());
+                }, 30);
+            });
+
+            // Toggle reminder options
+            $('#reminderToggle').click(function () {
+                $('#reminderOptions').slideToggle(300);
+                $(this).toggleClass('btn-primary btn-outline-primary');
+            });
+
+            // Send individual reminder
+            $('.send-reminder').click(function () {
+                var btn = $(this);
+                var customerId = btn.data('customer-id');
+                var dueDate = btn.data('due-date');
+
+                btn.html('<span class="spinner-border spinner-border-sm" role="status"></span> Preparing...');
+                btn.prop('disabled', true);
+
+                $.ajax({
+                    url: '/ajax/send-reminder/',
+                    method: 'POST',
+                    data: {
+                        customer_id: customerId,
+                        due_date: dueDate,
+                        csrfmiddlewaretoken: $('[name=csrfmiddlewaretoken]').val()
+                    },
+                    success: function (data) {
+                        if (data.success) {
+                            // Open WhatsApp Web in new tab
+                            const waUrl = `https://wa.me/${data.phone}?text=${encodeURIComponent(data.message)}`;
+                            window.open(waUrl, '_blank');
+
+                            btn.html('<i class="bi bi-check2-circle"></i> Sent');
+                            btn.removeClass('btn-outline-primary').addClass('btn-success');
+
+                            // Toast
+                            showToast('✅ WhatsApp opened successfully!', 'success');
+                        } else {
+                            btn.html('<i class="bi bi-whatsapp"></i>');
+                            showToast(data.msg || "❌ Failed to prepare reminder", 'danger');
+                        }
+                        btn.prop('disabled', false);
+                    },
+                    error: function (xhr, status, error) {
+                        btn.html('<i class="bi bi-whatsapp"></i>');
+                        btn.prop('disabled', false);
+                        showToast("❌ Network error: " + error, 'danger');
+                    }
+                });
+            });
+
+            // Animate table rows on hover
+            $('tbody tr').hover(
+                function () {
+                    $(this).addClass('animate__animated animate__pulse');
+                },
+                function () {
+                    $(this).removeClass('animate__animated animate__pulse');
+                }
+            );
+        });
+    </script>
+    <script>
+        // Count-up animation for statistics
+        $(document).ready(function () {
+            $('.count-up').each(function () {
+                var $this = $(this);
+                var target = $this.data('count');
+                var count = 0;
+                var increment = target / 30;
+
+                var timer = setInterval(function () {
+                    count += increment;
+                    if (count >= target) {
+                        clearInterval(timer);
+                        count = target;
+                    }
+                    $this.text(Math.floor(count));
+                }, 30);
+            });
+
+            $('.count-up-currency').each(function () {
+                var $this = $(this);
+                var target = $this.data('count');
+                var count = 0;
+                var increment = target / 30;
+
+                var timer = setInterval(function () {
+                    count += increment;
+                    if (count >= target) {
+                        clearInterval(timer);
+                        count = target;
+                    }
+                    $this.text('$' + Math.floor(count).toLocaleString());
+                }, 30);
+            });
+        });
+    </script>
+
+
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

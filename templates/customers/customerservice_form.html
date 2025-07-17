@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Edit Service{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h3>Edit Service for {{ customer }}</h3>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-md-6">
+                        {{ form.service_plan|as_crispy_field }}
+                        {{ form.ip_address|as_crispy_field }}
+                        {{ form.is_active|as_crispy_field }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.installation_date|as_crispy_field }}
+                        {{ form.notes|as_crispy_field }}
+                    </div>
+                </div>
+                
+                <div class="form-group mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save"></i> Save Service
+                    </button>
+                    <a href="{% url 'customer_detail' customer.pk %}" class="btn btn-secondary">
+                        <i class="bi bi-x-circle"></i> Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Service Plans{% endblock %}
+
+{% block content %}
+<div class="container animate__animated animate__fadeIn">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="fw-bold text-dark">
+            <i class="bi bi-speedometer2 text-primary me-2"></i> Service Plans
+        </h1>
+        <a href="{% url 'service_plan_create' %}" class="btn btn-primary hover-scale">
+            <i class="bi bi-plus-circle me-1"></i> Add New Plan
+        </a>
+    </div>
+
+    <!-- Filter Card -->
+    <div class="card border-0 shadow-lg mb-4 animate__animated animate__fadeInUp">
+        <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold text-dark">
+                <i class="bi bi-funnel-fill text-primary me-2"></i> Filter Plans
+            </h5>
+            <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#filterCollapse" aria-expanded="true" aria-controls="filterCollapse">
+                <i class="bi bi-chevron-down"></i>
+            </button>
+        </div>
+        <div class="collapse show" id="filterCollapse">
+            <div class="card-body">
+                <form method="get">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            {{ filter_form.name|as_crispy_field }}
+                        </div>
+                        <div class="col-md-2">
+                            {{ filter_form.speed|as_crispy_field }}
+                        </div>
+                        <div class="col-md-3">
+                            <div class="row g-2">
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold text-muted">Min Price</label>
+                                    <input type="number" name="price_min" class="form-control form-control-sm"
+                                           value="{{ filter.form.price_min.value|default_if_none:'' }}" step="0.01">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold text-muted">Max Price</label>
+                                    <input type="number" name="price_max" class="form-control form-control-sm"
+                                           value="{{ filter.form.price_max.value|default_if_none:'' }}" step="0.01">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            {{ filter_form.is_active|as_crispy_field }}
+                        </div>
+                        <div class="col-md-2 align-self-end">
+                            <button type="submit" class="btn btn-sm btn-primary w-100 hover-scale">
+                                <i class="bi bi-filter me-1"></i> Filter
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table Card -->
+    <div class="card border-0 shadow-lg animate__animated animate__fadeInUp">
+        <div class="card-header bg-white border-bottom">
+            <h5 class="mb-0 fw-bold text-dark">
+                <i class="bi bi-table text-primary me-2"></i> Service Plan List
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Name</th>
+                            <th>Speed</th>
+                            <th>Price</th>
+                            <th>Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for plan in serviceplans %}
+                        <tr class="animate__animated animate__fadeIn">
+                            <td class="fw-bold">{{ plan.name }}</td>
+                            <td>{{ plan.speed }}</td>
+                            <td>₹{{ plan.price|floatformat:2 }}</td>
+                            <td>
+                                <span class="badge bg-{% if plan.is_active %}success{% else %}danger{% endif %}">
+                                    {% if plan.is_active %}Active{% else %}Inactive{% endif %}
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group" role="group">
+                                    <a href="{% url 'service_plan_detail' plan.pk %}"
+                                       class="btn btn-sm btn-outline-info hover-scale" data-bs-toggle="tooltip" title="View">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="{% url 'service_plan_update' plan.pk %}"
+                                       class="btn btn-sm btn-outline-warning hover-scale" data-bs-toggle="tooltip" title="Edit">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a href="{% url 'service_plan_delete' plan.pk %}"
+                                       class="btn btn-sm btn-outline-danger hover-scale" data-bs-toggle="tooltip" title="Delete">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center py-4 text-muted">
+                                No service plans found
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer bg-white border-top-0">
+            {% include "includes/pagination.html" %}
+        </div>
+    </div>
+</div>
+{% endblock %}

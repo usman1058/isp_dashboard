@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Payment Reminder</title>
+</head>
+<body>
+    <p>Dear {{ customer.first_name }} {{ customer.last_name }},</p>
+    
+    <p>This is a friendly reminder that your payment of ${{ amount_due }} is due on {{ due_date|date:"F j, Y" }}.</p>
+    
+    <p>Please make your payment at your earliest convenience to avoid service interruption.</p>
+    
+    <p>Thank you for your business!</p>
+    
+    <p>Sincerely,<br>
+    Your ISP Team</p>
+</body>
+</html>

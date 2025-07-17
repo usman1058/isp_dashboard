@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Payment Status{% endblock %}
+
+{% block content %}
+<div class="container animate__animated animate__fadeIn">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="fw-bold text-dark">
+            <i class="bi bi-credit-card-2-front text-primary me-2"></i>
+            Payment Status – {{ month|date:"F Y" }}
+        </h1>
+        <form method="get" class="d-flex gap-2">
+            <input type="month" name="month" class="form-control form-control-sm"
+                   value="{{ request.GET.month|default:month|date:'Y-m' }}">
+            <button type="submit" class="btn btn-sm btn-primary hover-scale">
+                <i class="bi bi-funnel-fill me-1"></i> Filter
+            </button>
+        </form>
+    </div>
+
+    <div class="row">
+        <!-- ✅ Paid Customers -->
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-lg h-100 animate__animated animate__fadeInUp">
+                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-check-circle-fill me-2"></i> Paid Customers</h5>
+                    <span class="badge bg-white text-success rounded-pill">{{ payments_done.count }}</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Customer</th>
+                                    <th>Amount</th>
+                                    <th>Date</th>
+                                    <th>Method</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for payment in payments_done %}
+                                <tr>
+                                    <td>{{ payment.customer }}</td>
+                                    <td class="fw-bold text-success">₹{{ payment.amount }}</td>
+                                    <td>{{ payment.payment_date|date:"M d, Y" }}</td>
+                                    <td>{{ payment.get_method_display }}</td>
+                                    <td>
+                                        <a href="{% url 'payment_update' payment.pk %}"
+                                           class="btn btn-sm btn-outline-warning hover-scale">
+                                            <i class="bi bi-pencil"></i> Edit
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-4 text-muted">
+                                        No payments found
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ❌ Unpaid Customers -->
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-lg h-100 animate__animated animate__fadeInUp animate__delay-1s">
+                <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-x-circle-fill me-2"></i> Unpaid Customers</h5>
+                    <span class="badge bg-white text-danger rounded-pill">{{ unpaid_data|length }}</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Customer</th>
+                                    <th>Amount</th>
+                                    <th>Month</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for entry in unpaid_data %}
+                                <tr>
+                                    <td>{{ entry.customer }}</td>
+                                    <td class="fw-bold text-danger">₹{{ entry.amount }}</td>
+                                    <td>{{ entry.month_for|date:"F Y" }}</td>
+                                    <td>
+                                        <a href="{% url 'payment_add_prefilled' entry.customer.id entry.month_for.year entry.month_for.month %}"
+                                           class="btn btn-sm btn-outline-success hover-scale">
+                                            <i class="bi bi-cash-coin"></i> Add
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-4 text-success">
+                                        🎉 Everyone Paid! Great job!
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

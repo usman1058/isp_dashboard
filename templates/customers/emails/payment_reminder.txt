@@ -1,0 +1,10 @@
+Dear {{ customer.first_name }} {{ customer.last_name }},
+
+This is a friendly reminder that your payment of ${{ amount_due }} is due on {{ due_date|date:"F j, Y" }}.
+
+Please make your payment at your earliest convenience to avoid service interruption.
+
+Thank you for your business!
+
+Sincerely,
+Your ISP Team

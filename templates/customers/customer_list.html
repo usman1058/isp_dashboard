@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Customers{% endblock %}
+
+{% block content %}
+<div class="container animate__animated animate__fadeIn">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="fw-bold text-dark">
+            <i class="bi bi-people-fill text-primary me-2"></i>
+            Customers
+        </h1>
+        <a href="{% url 'customer_create' %}" class="btn btn-primary hover-scale">
+            <i class="bi bi-plus-circle me-1"></i> Add New Customer
+        </a>
+    </div>
+
+    <!-- Filter Card -->
+    <div class="card border-0 shadow-lg mb-4 animate__animated animate__fadeInUp">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center border-bottom">
+            <h5 class="mb-0 fw-bold text-dark">
+                <i class="bi bi-funnel-fill text-primary me-2"></i>
+                Search Customers
+            </h5>
+            <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" 
+                    data-bs-target="#filterCollapse" aria-expanded="true" aria-controls="filterCollapse">
+                <i class="bi bi-chevron-down"></i>
+            </button>
+        </div>
+        <div class="collapse show" id="filterCollapse">
+            <div class="card-body">
+                <form method="get" class="form-inline">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-muted">Search by Name, Email or Phone</label>
+                            <input type="text" name="search" class="form-control form-control-sm" placeholder="e.g. John, john@example.com, 1234567890" value="{{ request.GET.search }}">
+                        </div>
+                        <div class="col-md-2 align-self-end">
+                            <button type="submit" class="btn btn-sm btn-primary w-100 hover-scale">
+                                <i class="bi bi-search me-1"></i> Search
+                            </button>
+                        </div>
+                        <div class="col-md-2 align-self-end">
+                            <a href="{% url 'customer_list' %}" class="btn btn-sm btn-outline-secondary w-100 hover-scale">
+                                <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customers Table -->
+    <div class="card border-0 shadow-lg animate__animated animate__fadeInUp">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center border-bottom">
+            <h5 class="mb-0 fw-bold text-dark">
+                <i class="bi bi-table text-primary me-2"></i>
+                Customer List
+            </h5>
+            <span class="badge bg-primary rounded-pill animate__animated animate__pulse animate__infinite" 
+                  style="animation-duration: 2s">
+                {{ customers.paginator.count }} records
+            </span>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Name</th>
+                            <th>Contact</th>
+                            <th>Status</th>
+                            <th>Join Date</th>
+                            <th class="pe-4 text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for customer in customers %}
+                        <tr class="animate__animated animate__fadeIn" 
+                            style="animation-delay: {{ forloop.counter0|divisibleby:2|yesno:'0.1s,0.2s' }}">
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar avatar-sm bg-light-primary rounded-circle me-3">
+                                        <span class="avatar-text">{{ customer.first_name|first }}{{ customer.last_name|first }}</span>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0">{{ customer.first_name }} {{ customer.last_name }}</h6>
+                                        <small class="text-muted">@{{ customer.username }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex flex-column">
+                                    <span class="text-dark">{{ customer.email|default:"No email" }}</span>
+                                    <small class="text-muted">{{ customer.phone|default:"No phone" }}</small>
+                                </div>
+                            </td>
+                            <td>
+                                {% if customer.service_plan %}
+                                <span class="badge bg-success bg-opacity-10 text-success">
+                                    <i class="bi bi-check-circle-fill me-1"></i> Subscribed
+                                </span>
+                                {% else %}
+                                <span class="badge bg-danger bg-opacity-10 text-danger">
+                                    <i class="bi bi-exclamation-circle-fill me-1"></i> Not Subscribed
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary bg-opacity-10 text-secondary">
+                                    {{ customer.join_date|date:"M d, Y" }}
+                                </span>
+                            </td>
+                            <td class="pe-4 text-end">
+                                <div class="btn-group" role="group">
+                                    <a href="{% url 'customer_detail' customer.pk %}" 
+                                       class="btn btn-sm btn-outline-info hover-scale me-2"
+                                       data-bs-toggle="tooltip" data-bs-placement="top" title="View Details">
+                                        <i class="bi bi-eye-fill"></i>
+                                    </a>
+                                    <a href="{% url 'customer_update' customer.pk %}" 
+                                       class="btn btn-sm btn-outline-warning hover-scale me-2"
+                                       data-bs-toggle="tooltip" data-bs-placement="top" title="Edit">
+                                        <i class="bi bi-pencil-fill"></i>
+                                    </a>
+                                    <a href="{% url 'customer_delete' customer.pk %}" 
+                                       class="btn btn-sm btn-outline-danger hover-scale"
+                                       data-bs-toggle="tooltip" data-bs-placement="top" title="Delete">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center py-5">
+                                <div class="mb-3 animate__animated animate__bounceIn">
+                                    <i class="bi bi-people text-muted" style="font-size: 3rem;"></i>
+                                </div>
+                                <h5 class="text-muted">No customers found</h5>
+                                <p class="text-muted">Try adjusting your search or add new customers</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer bg-white border-top-0">
+            {% include 'includes/pagination.html' %}
+        </div>
+    </div>
+</div>
+{% block extra_js %}
+
+<script>
+    $(document).ready(function() {
+        $('[data-bs-toggle="tooltip"]').tooltip();
+
+        $('tbody tr').hover(
+            function() {
+                $(this).addClass('animate__animated animate__pulse');
+            },
+            function() {
+                $(this).removeClass('animate__animated animate__pulse');
+            }
+        );
+
+        $('#filterCollapse').on('shown.bs.collapse', function() {
+            $('[data-bs-target="#filterCollapse"] i').removeClass('bi-chevron-down').addClass('bi-chevron-up');
+        });
+
+        $('#filterCollapse').on('hidden.bs.collapse', function() {
+            $('[data-bs-target="#filterCollapse"] i').removeClass('bi-chevron-up').addClass('bi-chevron-down');
+        });
+    });
+</script>
+{% endblock %}
+
+{% endblock %}

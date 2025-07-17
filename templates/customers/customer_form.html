@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}{% if form.instance.pk %}Edit{% else %}Add{% endif %} Customer{% endblock %}
+
+{% block content %}
+<div class="container mt-4 animate__animated animate__fadeIn">
+    <div class="card border-0 shadow-lg">
+        <div class="card-header d-flex justify-content-between align-items-center {% if form.instance.pk %}bg-warning{% else %}bg-success{% endif %} text-white">
+            <h2 class="mb-0 fw-bold">
+                <i class="bi bi-person-{% if form.instance.pk %}lines-fill{% else %}plus-fill{% endif %} me-2"></i>
+                {% if form.instance.pk %}Edit{% else %}Add New{% endif %} Customer
+            </h2>
+            {% if form.instance.pk %}
+            <span class="badge bg-white text-dark rounded-pill">
+                ID: {{ form.instance.pk }}
+            </span>
+            {% endif %}
+        </div>
+        <div class="card-body">
+            <form method="post" id="customerForm" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <!-- Basic Information -->
+                    <div class="col-md-6">
+                        {{ form.first_name|as_crispy_field }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.last_name|as_crispy_field }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.username|as_crispy_field }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.phone|as_crispy_field }}
+                    </div>
+                    
+                    <!-- Optional Email Field -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.email.id_for_label }}" class="form-label">
+                                {{ form.email.label }}
+                                <span class="text-muted small">(Optional)</span>
+                            </label>
+                            <input type="email" 
+                                   name="{{ form.email.name }}" 
+                                   id="{{ form.email.id_for_label }}" 
+                                   value="{{ form.email.value|default:'' }}" 
+                                   class="form-control {% if form.email.errors %}is-invalid{% endif %}"
+                                   placeholder="example@domain.com">
+                            {% if form.email.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.email.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <small class="form-text text-muted">We'll use this for communication if provided</small>
+                        </div>
+                    </div>
+                    
+                    <!-- Dates and Service Info -->
+                    <div class="col-md-6">
+                        {{ form.join_date|as_crispy_field }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.service_plan|as_crispy_field }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.service_installation_date|as_crispy_field }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.status|as_crispy_field }}
+                    </div>
+                    
+                    <!-- ID Card Uploads -->
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">ID Card Front</h6>
+                            </div>
+                            <div class="card-body">
+                                {{ form.id_card_front|as_crispy_field }}
+                                {% if form.instance.id_card_front %}
+                                    <div class="mt-2">
+                                        <img src="{{ form.instance.id_card_front.url }}" class="img-thumbnail" style="max-height: 150px;">
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">ID Card Back</h6>
+                            </div>
+                            <div class="card-body">
+                                {{ form.id_card_back|as_crispy_field }}
+                                {% if form.instance.id_card_back %}
+                                    <div class="mt-2">
+                                        <img src="{{ form.instance.id_card_back.url }}" class="img-thumbnail" style="max-height: 150px;">
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Notes and Address -->
+                    {% if form.address or form.notes %}
+                    <div class="col-12">
+                        {% if form.address %}{{ form.address|as_crispy_field }}{% endif %}
+                        {% if form.notes %}{{ form.notes|as_crispy_field }}{% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group mt-4 d-flex justify-content-between">
+                    <div>
+                        <button type="submit" class="btn btn-primary hover-scale me-2">
+                            <i class="bi bi-save me-1"></i> Save Customer
+                        </button>
+                        <a href="{% if form.instance.pk %}{% url 'customer_detail' form.instance.pk %}{% else %}{% url 'customer_list' %}{% endif %}"
+                            class="btn btn-outline-secondary hover-scale">
+                            <i class="bi bi-x-circle me-1"></i> Cancel
+                        </a>
+                    </div>
+                    {% if form.instance.pk %}
+                    <div>
+                        <a href="{% url 'customer_delete' form.instance.pk %}"
+                            class="btn btn-outline-danger hover-scale">
+                            <i class="bi bi-trash-fill me-1"></i> Delete
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function () {
+        // Form submission animation
+        $('#customerForm').on('submit', function (e) {
+            $('button[type="submit"]').html('<span class="spinner-border spinner-border-sm" role="status"></span> Saving...');
+        });
+
+        // Phone number formatting
+        $('#id_phone').on('input', function () {
+            var phone = $(this).val().replace(/\D/g, '');
+            if (phone.length > 3 && phone.length <= 6) {
+                phone = phone.replace(/(\d{3})(\d{0,3})/, '$1-$2');
+            } else if (phone.length > 6) {
+                phone = phone.replace(/(\d{3})(\d{3})(\d{0,4})/, '$1-$2-$3');
+            }
+            $(this).val(phone);
+        });
+
+        // Auto-generate username from email if empty
+        $('#id_email').on('blur', function() {
+            if ($('#id_username').val() === '' && $(this).val() !== '') {
+                var username = $(this).val().split('@')[0];
+                $('#id_username').val(username);
+            }
+        });
+
+        // File upload preview
+        $('input[type="file"]').change(function() {
+            var input = this;
+            var previewId = $(this).attr('id') + '-preview';
+            var preview = $('#' + previewId);
+            
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    if (!preview.length) {
+                        $(input).after('<div id="' + previewId + '" class="mt-2"><img src="' + e.target.result + '" class="img-thumbnail" style="max-height: 150px;"></div>');
+                    } else {
+                        preview.find('img').attr('src', e.target.result);
+                    }
+                }
+                
+                reader.readAsDataURL(input.files[0]);
+            }
+        });
+
+        // Date picker enhancement
+        $('input[type="date"]').attr('type', 'date');
+
+        // Animate form fields on focus
+        $('input, select, textarea').focus(function () {
+            $(this).parent().addClass('animate__animated animate__pulse');
+        }).blur(function () {
+            $(this).parent().removeClass('animate__animated animate__pulse');
+        });
+    });
+</script>
+{% endblock %}
