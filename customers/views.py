@@ -549,7 +549,10 @@ from django.http import JsonResponse
 from django.utils import timezone
 from dateutil.relativedelta import relativedelta
 from urllib.parse import quote
-import pywhatkit
+import os
+if os.environ.get("DISPLAY"):
+    import pywhatkit
+
 
 logger = logging.getLogger(__name__)
 
