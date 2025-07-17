@@ -399,7 +399,7 @@
                                 </div>
                             </td>
                             <td>{{ payment.customer }}</td>
-                            <td class="fw-bold">${{ payment.amount|floatformat:2 }}</td>
+                            <td class="fw-bold">Rs.{{ payment.amount|floatformat:2 }}</td>
                             <td>
                                 <span class="badge bg-{% if payment.method == 'cash' %}success{% else %}primary{% endif %} bg-opacity-10 text-{% if payment.method == 'cash' %}success{% else %}primary{% endif %}">
                                     <i class="bi bi-{% if payment.method == 'cash' %}cash{% else %}credit-card{% endif %} me-1"></i>
