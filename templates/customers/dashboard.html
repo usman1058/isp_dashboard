@@ -95,7 +95,7 @@
                 <div class="flex-grow-1">
                     <div class="d-flex justify-content-between mb-1">
                         <span class="text-muted small">Expected Revenue</span>
-                        <span class="fw-bold text-dark">₹{{ expected_payments|floatformat:"0" }}</span>
+                        <span class="fw-bold text-dark">Rs.{{ expected_payments|floatformat:"0" }}</span>
                     </div>
                     <div class="progress" style="height: 6px;">
                         <div class="progress-bar bg-primary" 
@@ -113,7 +113,7 @@
                 <div class="flex-grow-1">
                     <div class="d-flex justify-content-between mb-1">
                         <span class="text-muted small">Collected</span>
-                        <span class="fw-bold text-success">₹<span class="count-up" data-count="{{ total_payments|floatformat:'0' }}">0</span></span>
+                        <span class="fw-bold text-success">Rs.<span class="count-up" data-count="{{ total_payments|floatformat:'0' }}">0</span></span>
                     </div>
                     <div class="progress" style="height: 6px;">
                         <div class="progress-bar bg-success progress-bar-striped progress-bar-animated" 
@@ -194,7 +194,7 @@
                                 </div>
                             </td>
                             <td>{{ record.due_month }}</td>
-                            <td class="fw-bold">₹{{ record.amount }}</td>
+                            <td class="fw-bold">Rs.{{ record.amount }}</td>
                             <td>
                                 <span class="badge {% if record.days_left == 0 %}bg-danger{% elif record.days_left <= 2 %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
                                     {{ record.due_date|date:"M d, Y" }}
@@ -334,7 +334,7 @@
                                 <option value="thankyou">Thank You (Payment Received)</option>
                                 <option value="custom">Custom Message</option>
                             </select>
-                            <textarea id="messageContent" class="form-control" rows="3" placeholder="Custom message content...">Dear {name}, your payment of ₹{amount} for {month} is due on {due_date}. Please make the payment at your earliest convenience.</textarea>
+                            <textarea id="messageContent" class="form-control" rows="3" placeholder="Custom message content...">Dear {name}, your payment of Rs.{amount} for {month} is due on {due_date}. Please make the payment at your earliest convenience.</textarea>
                         </div>
                         <div class="d-flex justify-content-between align-items-center">
                             <div class="form-check">
