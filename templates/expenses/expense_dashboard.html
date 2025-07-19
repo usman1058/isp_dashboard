@@ -304,7 +304,7 @@
                     <div class="card expense-card bg-gradient-primary text-white">
                         <div class="card-body">
                             <h6>Total Expenses</h6>
-                            <h2 class="fw-bold">₹{{ total_expense|floatformat:2 }}</h2>
+                            <h2 class="fw-bold">Rs.{{ total_expense|floatformat:2 }}</h2>
                             <p class="small mb-0">All categories combined</p>
                         </div>
                     </div>
@@ -315,7 +315,7 @@
                         <div class="card expense-card">
                             <div class="card-body">
                                 <h6>{{ cat.category__name }}</h6>
-                                <h4 class="text-primary fw-semibold">₹{{ cat.total|floatformat:2 }}</h4>
+                                <h4 class="text-primary fw-semibold">Rs.{{ cat.total|floatformat:2 }}</h4>
                                 <p class="small text-muted mb-0">{{ cat.percentage|floatformat:1 }}% of total</p>
                             </div>
                         </div>
@@ -350,7 +350,7 @@
                             <th>Date</th>
                             <th>Category</th>
                             <th>Description</th>
-                            <th class="text-end">Amount (₹)</th>
+                            <th class="text-end">Amount (Rs.)</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -391,7 +391,7 @@
                 <h5 class="mb-0 fw-bold">
                     <i class="bi bi-tag-fill me-2" style="color: {{ cat.color }}"></i>{{ cat.category__name }}
                 </h5>
-                <span class="badge bg-primary rounded-pill">₹{{ cat.total|floatformat:2 }}</span>
+                <span class="badge bg-primary rounded-pill">Rs.{{ cat.total|floatformat:2 }}</span>
             </div>
             <div class="table-responsive">
                 <table class="table table-hover">
@@ -399,7 +399,7 @@
                         <tr>
                             <th>Date</th>
                             <th>Description</th>
-                            <th class="text-end">Amount (₹)</th>
+                            <th class="text-end">Amount (Rs.)</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -449,13 +449,13 @@
                     {% for cat in category_totals %}
                     <tr>
                         <th>{{ cat.category__name }}</th>
-                        <td class="text-end">₹{{ cat.total|floatformat:2 }}</td>
+                        <td class="text-end">Rs.{{ cat.total|floatformat:2 }}</td>
                         <td class="text-muted text-end">{{ cat.percentage|floatformat:1 }}%</td>
                     </tr>
                     {% endfor %}
                     <tr class="border-top">
                         <th>Total Expenses</th>
-                        <td class="text-end fw-bold">₹{{ total_expense|floatformat:2 }}</td>
+                        <td class="text-end fw-bold">Rs.{{ total_expense|floatformat:2 }}</td>
                         <td class="text-end fw-bold">100%</td>
                     </tr>
                 </tbody>
@@ -556,7 +556,7 @@
                             const value = context.raw || 0;
                             const total = context.dataset.data.reduce((a, b) => a + b, 0);
                             const percentage = Math.round((value / total) * 100);
-                            return `${label}: ₹${value.toFixed(2)} (${percentage}%)`;
+                            return `${label}: Rs.${value.toFixed(2)} (${percentage}%)`;
                         }
                     },
                     bodyFont: {

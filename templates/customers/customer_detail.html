@@ -246,7 +246,7 @@
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <h4 class="mb-0">{{ customer.service_plan.name }}</h4>
                                 <span class="badge bg-primary bg-opacity-10 text-primary">
-                                    ₹{{ customer.service_plan.price }}/mo
+                                    Rs.{{ customer.service_plan.price }}/mo
                                 </span>
                             </div>
                             <p class="text-muted mb-3">{{ customer.service_plan.description|default:"No description" }}</p>
@@ -302,7 +302,7 @@
                         <div class="col-6">
                             <div class="card border-0 bg-light-info bg-opacity-10 h-100">
                                 <div class="card-body text-center">
-                                    <h2 class="mb-1 fw-bold text-info">₹{{ total_paid|default:"0" }}</h2>
+                                    <h2 class="mb-1 fw-bold text-info">Rs.{{ total_paid|default:"0" }}</h2>
                                     <p class="small text-muted mb-0">Total Paid</p>
                                 </div>
                             </div>
@@ -354,7 +354,7 @@
                                     {{ record.due_date|date:"M d" }}
                                 </span>
                             </td>
-                            <td class="fw-bold">₹{{ record.amount }}</td>
+                            <td class="fw-bold">Rs.{{ record.amount }}</td>
                             <td>
                                 {% if record.status == 'Paid' %}
                                 <span class="badge bg-success bg-opacity-10 text-success">

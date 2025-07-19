@@ -90,7 +90,7 @@
                         <tr class="animate__animated animate__fadeIn" style="animation-delay: {{ forloop.counter0|divisibleby:2|yesno:'0.1s,0.2s' }}">
                             <td>{{ payment.payment_date|date:"M d, Y" }}</td>
                             <td>{{ payment.customer }}</td>
-                            <td class="fw-bold">₹{{ payment.amount }}</td>
+                            <td class="fw-bold">Rs.{{ payment.amount }}</td>
                             <td>{{ payment.get_method_display }}</td>
                             <td>{{ payment.received_by.get_full_name|default:payment.received_by.username }}</td>
                             <td class="text-end">

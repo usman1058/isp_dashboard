@@ -43,7 +43,7 @@
                                 {% for payment in payments_done %}
                                 <tr>
                                     <td>{{ payment.customer }}</td>
-                                    <td class="fw-bold text-success">₹{{ payment.amount }}</td>
+                                    <td class="fw-bold text-success">Rs.{{ payment.amount }}</td>
                                     <td>{{ payment.payment_date|date:"M d, Y" }}</td>
                                     <td>{{ payment.get_method_display }}</td>
                                     <td>
@@ -89,7 +89,7 @@
                                 {% for entry in unpaid_data %}
                                 <tr>
                                     <td>{{ entry.customer }}</td>
-                                    <td class="fw-bold text-danger">₹{{ entry.amount }}</td>
+                                    <td class="fw-bold text-danger">Rs.{{ entry.amount }}</td>
                                     <td>{{ entry.month_for|date:"F Y" }}</td>
                                     <td>
                                         <a href="{% url 'payment_add_prefilled' entry.customer.id entry.month_for.year entry.month_for.month %}"

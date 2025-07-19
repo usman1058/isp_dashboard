@@ -30,7 +30,7 @@
                 </div>
                 <div class="card-body">
                     <p><strong>Customer:</strong> {{ payment.customer.first_name }} {{ payment.customer.last_name }}</p>
-                    <p><strong>Amount:</strong> ₹{{ payment.amount }}</p>
+                    <p><strong>Amount:</strong> Rs.{{ payment.amount }}</p>
                     <p><strong>Payment Date:</strong> {{ payment.payment_date|date:"F j, Y" }}</p>
                     <p><strong>Method:</strong> {{ payment.get_method_display }}</p>
                     <p><strong>Received By:</strong> {{ payment.received_by.get_full_name|default:payment.received_by.username }}</p>

@@ -46,12 +46,12 @@
                         Summary
                     </div>
                     <div class="card-body">
-                        <h4>Total: ₹{{ total_year|floatformat:2 }}</h4>
+                        <h4>Total: Rs.{{ total_year|floatformat:2 }}</h4>
                         <table class="table table-sm mt-3">
                             {% for label, amount in monthly_data %}
                             <tr>
                                 <td>{{ label }}</td>
-                                <td class="text-end">₹{{ amount|floatformat:2 }}</td>
+                                <td class="text-end">Rs.{{ amount|floatformat:2 }}</td>
                             </tr>
                             {% endfor %}
                         </table>
@@ -86,7 +86,7 @@
                     beginAtZero: true,
                     ticks: {
                         callback: function(value) {
-                            return '₹' + value;
+                            return 'Rs.' + value;
                         }
                     }
                 }
@@ -95,7 +95,7 @@
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            return '₹' + context.raw.toFixed(2);
+                            return 'Rs.' + context.raw.toFixed(2);
                         }
                     }
                 }

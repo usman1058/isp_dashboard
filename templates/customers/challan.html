@@ -17,10 +17,10 @@
             <div class="col-md-6">
                 <h5 class="fw-bold text-secondary">Customer Info</h5>
                 <p class="mb-1"><strong>Name:</strong> {{ payment.customer.first_name }} {{ payment.customer.last_name }}</p>
-                <p class="mb-1"><strong>Email:</strong> {{ payment.customer.email|default:"-" }}</p>
+                <!-- <p class="mb-1"><strong>Email:</strong> {{ payment.customer.email|default:"-" }}</p> -->
                 <p class="mb-1"><strong>Phone:</strong> {{ payment.customer.phone|default:"-" }}</p>
                 <p class="mb-1"><strong>Address:</strong> {{ payment.customer.address|linebreaksbr|default:"-" }}</p>
-                <p class="mb-1"><strong>Service Plan:</strong> {{ payment.customer.service_plan.name }} (₹{{ payment.customer.service_plan.price }})</p>
+                <p class="mb-1"><strong>Service Plan:</strong> {{ payment.customer.service_plan.name }} (Rs.{{ payment.customer.service_plan.price }})</p>
             </div>
             <div class="col-md-6 text-md-end">
                 <h5 class="fw-bold text-secondary">Receipt Info</h5>
@@ -40,7 +40,7 @@
                         <tr>
                             <th>#</th>
                             <th>Description</th>
-                            <th class="text-end">Amount (₹)</th>
+                            <th class="text-end">Amount (Rs.)</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -53,7 +53,7 @@
                     <tfoot>
                         <tr class="table-secondary">
                             <th colspan="2" class="text-end">Total</th>
-                            <th class="text-end">₹{{ payment.amount }}</th>
+                            <th class="text-end">Rs.{{ payment.amount }}</th>
                         </tr>
                     </tfoot>
                 </table>
