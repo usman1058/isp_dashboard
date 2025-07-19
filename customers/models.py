@@ -53,7 +53,6 @@ class Customer(models.Model):
     join_date = models.DateField(default=timezone.now)
     
     # Contact Information
-    email = models.EmailField(unique=True)
     phone = models.CharField(max_length=20)
     
     # Service Information
@@ -103,8 +102,8 @@ class Customer(models.Model):
 
     def save(self, *args, **kwargs):
         # Set username to email prefix if not provided
-        if not self.username and self.email:
-            self.username = self.email.split('@')[0]
+        if not self.username and self.first_name:
+            self.username = self.first_name
         
         # Ensure username is unique
         if Customer.objects.filter(username=self.username).exclude(pk=self.pk).exists():
@@ -141,7 +140,6 @@ class Reminder(models.Model):
     REMINDER_TYPES = [
         ('whatsapp', 'WhatsApp'),
         ('sms', 'SMS'),
-        ('email', 'Email'),
     ]
     
     STATUS_CHOICES = [
@@ -239,7 +237,6 @@ class Payment(models.Model):
     
 class PaymentReminder(models.Model):
         REMINDER_TYPES = [
-            ('email', 'Email'),
             ('sms', 'SMS'),
         ]
         

@@ -151,7 +151,7 @@ class CustomerFilter(django_filters.FilterSet):
         return queryset.filter(
             Q(first_name__icontains=value) |
             Q(last_name__icontains=value) |
-            Q(email__icontains=value) |
+            Q(username__icontains=value) |
             Q(phone__icontains=value)
         )
 

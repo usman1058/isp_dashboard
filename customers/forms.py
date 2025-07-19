@@ -28,7 +28,7 @@ class CustomerForm(forms.ModelForm):
             'join_date': forms.DateInput(attrs={'type': 'date'}),
             'service_installation_date': forms.DateInput(attrs={'type': 'date'}),
             'notes': forms.Textarea(attrs={'rows': 3}),
-            'username': forms.TextInput(attrs={'placeholder': 'Will be generated from email if blank'}),
+            'username': forms.TextInput(attrs={'placeholder': 'Will be generated from username if blank'}),
             'id_card_front': forms.ClearableFileInput(attrs={
                 'accept': 'image/jpeg, image/png',
                 'class': 'file-upload'
@@ -39,7 +39,7 @@ class CustomerForm(forms.ModelForm):
             }),
         }
         help_texts = {
-            'username': 'Leave blank to auto-generate from email',
+            'username': 'Leave blank to auto-generate from username',
             'id_card_front': 'Upload front side of ID card (JPEG/PNG)',
             'id_card_back': 'Upload back side of ID card (JPEG/PNG)',
         }
@@ -62,14 +62,10 @@ class CustomerForm(forms.ModelForm):
     
     def clean_username(self):
         username = self.cleaned_data.get('username')
-        if not username:
-            email = self.cleaned_data.get('email', '')
-            username = email.split('@')[0] if email else ''
         return username
     
     def clean(self):
         cleaned_data = super().clean()
-        email = cleaned_data.get('email')
         username = cleaned_data.get('username')
         
         # Ensure username is unique

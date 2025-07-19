@@ -8,15 +8,15 @@ class CustomerResource(resources.ModelResource):
         model = Customer
         skip_unchanged = True
         report_skipped = True
-        import_id_fields = ['email']  # Use email as unique identifier
-        fields = ('first_name', 'last_name', 'email', 'phone', 'address', 'status')
+        import_id_fields = ['username']  # Use email as unique identifier
+        fields = ('first_name', 'last_name', 'username', 'phone', 'address', 'status')
 
 @admin.register(Customer)
 class CustomerAdmin(ImportExportModelAdmin):
     resource_class = CustomerResource
-    list_display = ('first_name', 'last_name', 'email', 'phone', 'status')
+    list_display = ('first_name', 'last_name', 'username', 'phone', 'status')
     list_filter = ('status',)
-    search_fields = ('first_name', 'last_name', 'email', 'phone')
+    search_fields = ('first_name', 'last_name', 'username', 'phone')
     
     
     
@@ -53,7 +53,7 @@ class CustomUserAdmin(BaseUserAdmin):
 
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
-        ('Personal info', {'fields': ('first_name', 'last_name', 'email')}),
+        ('Personal info', {'fields': ('first_name', 'last_name')}),
         ('Permissions', {
             'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions'),
             'description': "Select multiple permissions using Ctrl/Cmd + Click"
