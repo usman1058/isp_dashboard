@@ -238,14 +238,19 @@ class CustomerDetailView(LoginRequiredMixin, DetailView):
 
                     unpaid_payments.append(month)
 
+# Calculate due date using install day
+                due_day = customer.service_installation_date.day
+                due_date = month.replace(day=due_day)
+
                 history.append({
                     'month': month,
-                    'due_date': month,
+                    'due_date': due_date,
                     'status': status,
                     'amount': customer.service_plan.price,
                     'payment_date': payment_date,
                     'action_url': action_url,
                 })
+
 
             context.update({
                 'payment_history': history,
@@ -714,10 +719,20 @@ def send_whatsapp_reminder(customer, due_date, amount, action_type="instant", se
             "status": "error",
             "message": str(e)
         }
+from datetime import date
+
 @login_required
 def payment_challan_view(request, pk):
     payment = get_object_or_404(Payment, pk=pk)
-    return render(request, 'customers/challan.html', {'payment': payment})
+
+    # Compute correct due date based on service_installation_date
+    install_day = payment.customer.service_installation_date.day
+    due_date = payment.month_for.replace(day=install_day)
+
+    return render(request, 'customers/challan.html', {
+        'payment': payment,
+        'due_date': due_date,
+    })
 
 
 

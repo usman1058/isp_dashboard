@@ -25,7 +25,8 @@
             <div class="col-md-6 text-md-end">
                 <h5 class="fw-bold text-secondary">Receipt Info</h5>
                 <p class="mb-1"><strong>Challan #:</strong> {{ payment.pk|stringformat:"06d" }}</p>
-                <p class="mb-1"><strong>Date:</strong> {{ payment.payment_date|date:"F j, Y" }}</p>
+                <p class="mb-1"><strong>Payment Date:</strong> {{ payment.payment_date|date:"F j, Y" }}</p>
+                <p class="mb-1"><strong>Due Date:</strong> {{ due_date|date:"F j, Y" }}</p>
                 <p class="mb-1"><strong>Method:</strong> {{ payment.get_method_display }}</p>
                 <p class="mb-1"><strong>Received By:</strong> {{ payment.received_by.get_full_name|default:payment.received_by.username }}</p>
             </div>
