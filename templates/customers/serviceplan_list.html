@@ -88,7 +88,7 @@
                         <tr class="animate__animated animate__fadeIn">
                             <td class="fw-bold">{{ plan.name }}</td>
                             <td>{{ plan.speed }}</td>
-                            <td>₹{{ plan.price|floatformat:2 }}</td>
+                            <td>Rs.{{ plan.price|floatformat:2 }}</td>
                             <td>
                                 <span class="badge bg-{% if plan.is_active %}success{% else %}danger{% endif %}">
                                     {% if plan.is_active %}Active{% else %}Inactive{% endif %}
