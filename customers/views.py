@@ -775,3 +775,37 @@ def ajax_schedule_reminder(request):
     except Exception as e:
         return JsonResponse({"success": False, "msg": str(e)})
 
+
+import os
+import shutil
+import datetime
+from django.http import HttpResponse
+from django.conf import settings
+
+def download_latest_backup(request):
+    backup_dir = os.path.join(settings.BASE_DIR, "backups")
+    os.makedirs(backup_dir, exist_ok=True)
+
+    # Get list of existing backups
+    files = [f for f in os.listdir(backup_dir) if f.endswith(".sqlite3")]
+
+    # If no backups exist, create one
+    if not files:
+        now = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        src_db = os.path.join(settings.BASE_DIR, "db.sqlite3")
+        if os.path.exists(src_db):
+            backup_path = os.path.join(backup_dir, f"db_backup_{now}.sqlite3")
+            shutil.copy2(src_db, backup_path)
+            files.append(f"db_backup_{now}.sqlite3")
+        else:
+            return HttpResponse("No database found to backup.", status=500)
+
+    # Find the latest backup
+    latest_file = max(files, key=lambda f: os.path.getctime(os.path.join(backup_dir, f)))
+    latest_file_path = os.path.join(backup_dir, latest_file)
+
+    # Serve it as a file download
+    with open(latest_file_path, "rb") as f:
+        response = HttpResponse(f.read(), content_type="application/x-sqlite3")
+        response["Content-Disposition"] = f'attachment; filename="{latest_file}"'
+        return response
