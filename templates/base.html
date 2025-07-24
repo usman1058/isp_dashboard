@@ -576,15 +576,6 @@
 
 <!-- SweetAlert for beautiful alerts -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-<script>
-function sendToRawBT() {
-    const challan = document.getElementById("challan-content").innerHTML;
-    const encoded = encodeURIComponent(challan);
-    // Open RawBT app with the challan HTML content
-    window.location.href = "rawbt:print?html=" + encoded;
-}
-</script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
     // Toast notification function
