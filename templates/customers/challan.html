@@ -16,6 +16,7 @@
         <div class="row mb-4">
             <div class="col-md-6">
                 <h5 class="fw-bold text-secondary">Customer Info</h5>
+                <p class="mb-1"><strong>Username:</strong> {{ payment.customer.username }}</p>
                 <p class="mb-1"><strong>Name:</strong> {{ payment.customer.first_name }} {{ payment.customer.last_name }}</p>
                 <!-- <p class="mb-1"><strong>Email:</strong> {{ payment.customer.email|default:"-" }}</p> -->
                 <p class="mb-1"><strong>Phone:</strong> {{ payment.customer.phone|default:"-" }}</p>
