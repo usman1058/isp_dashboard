@@ -10,9 +10,11 @@
             <i class="bi bi-people-fill text-primary me-2"></i>
             Customers
         </h1>
-        <a href="{% url 'customer_create' %}" class="btn btn-primary hover-scale">
-            <i class="bi bi-plus-circle me-1"></i> Add New Customer
-        </a>
+        {% if perms.customers.add_customer %}
+<a href="{% url 'customer_create' %}" class="btn btn-primary hover-scale">
+    <i class="bi bi-plus-circle me-1"></i> Add New Customer
+</a>
+{% endif %}
     </div>
 
     <!-- Filter Card -->
@@ -112,23 +114,35 @@
                                 </span>
                             </td>
                             <td class="pe-4 text-end">
-                                <div class="btn-group" role="group">
+                               <div class="btn-group" role="group">
+    <!-- View button (optional, if you want to restrict) -->
+                                    {% if perms.customers.view_customer %}
                                     <a href="{% url 'customer_detail' customer.pk %}" 
-                                       class="btn btn-sm btn-outline-info hover-scale me-2"
-                                       data-bs-toggle="tooltip" data-bs-placement="top" title="View Details">
+                                    class="btn btn-sm btn-outline-info hover-scale me-2"
+                                    data-bs-toggle="tooltip" data-bs-placement="top" title="View Details">
                                         <i class="bi bi-eye-fill"></i>
                                     </a>
+                                    {% endif %}
+
+                                    <!-- Edit button -->
+                                    {% if perms.customers.change_customer %}
                                     <a href="{% url 'customer_update' customer.pk %}" 
-                                       class="btn btn-sm btn-outline-warning hover-scale me-2"
-                                       data-bs-toggle="tooltip" data-bs-placement="top" title="Edit">
+                                    class="btn btn-sm btn-outline-warning hover-scale me-2"
+                                    data-bs-toggle="tooltip" data-bs-placement="top" title="Edit">
                                         <i class="bi bi-pencil-fill"></i>
                                     </a>
+                                    {% endif %}
+
+                                    <!-- Delete button -->
+                                    {% if perms.customers.delete_customer %}
                                     <a href="{% url 'customer_delete' customer.pk %}" 
-                                       class="btn btn-sm btn-outline-danger hover-scale"
-                                       data-bs-toggle="tooltip" data-bs-placement="top" title="Delete">
+                                    class="btn btn-sm btn-outline-danger hover-scale"
+                                    data-bs-toggle="tooltip" data-bs-placement="top" title="Delete">
                                         <i class="bi bi-trash-fill"></i>
                                     </a>
+                                    {% endif %}
                                 </div>
+
                             </td>
                         </tr>
                         {% empty %}

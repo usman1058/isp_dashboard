@@ -9,9 +9,11 @@
         <h1 class="fw-bold text-dark">
             <i class="bi bi-cash-coin text-success me-2"></i> Payments
         </h1>
-        <a href="{% url 'payment_create' %}" class="btn btn-success hover-scale">
-            <i class="bi bi-plus-circle me-1"></i> Add Payment
-        </a>
+{% if perms.customers.add_payment %}
+<a href="{% url 'payment_create' %}" class="btn btn-success hover-scale">
+    <i class="bi bi-plus-circle me-1"></i> Add Payment
+</a>
+{% endif %}
     </div>
 
     <!-- Filter Card -->
@@ -94,17 +96,44 @@
                             <td>{{ payment.get_method_display }}</td>
                             <td>{{ payment.received_by.get_full_name|default:payment.received_by.username }}</td>
                             <td class="text-end">
-                                <div class="btn-group">
-                                    <a href="{% url 'payment_detail' payment.pk %}" class="btn btn-sm btn-outline-info hover-scale" title="Details">
-                                        <i class="bi bi-eye"></i>
-                                    </a>
-                                    <a href="{% url 'payment_update' payment.pk %}" class="btn btn-sm btn-outline-warning hover-scale" title="Edit">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                    <a href="{% url 'payment_delete' payment.pk %}" class="btn btn-sm btn-outline-danger hover-scale" title="Delete">
-                                        <i class="bi bi-trash"></i>
-                                    </a>
-                                </div>
+                               <div class="btn-group">
+    <!-- Challan (assumed as view-related) -->
+    {% if perms.customers.view_payment %}
+    <a href="{% url 'payment_challan' payment.pk %}" 
+       class="btn btn-sm btn-outline-secondary hover-scale" 
+       title="Challan">
+        <i class="bi bi-receipt me-1"></i>
+    </a>
+    {% endif %}
+
+    <!-- View -->
+    {% if perms.customers.view_payment %}
+    <a href="{% url 'payment_detail' payment.pk %}" 
+       class="btn btn-sm btn-outline-info hover-scale" 
+       title="Details">
+        <i class="bi bi-eye"></i>
+    </a>
+    {% endif %}
+
+    <!-- Edit -->
+    {% if perms.customers.change_payment %}
+    <a href="{% url 'payment_update' payment.pk %}" 
+       class="btn btn-sm btn-outline-warning hover-scale" 
+       title="Edit">
+        <i class="bi bi-pencil"></i>
+    </a>
+    {% endif %}
+
+    <!-- Delete -->
+    {% if perms.customers.delete_payment %}
+    <a href="{% url 'payment_delete' payment.pk %}" 
+       class="btn btn-sm btn-outline-danger hover-scale" 
+       title="Delete">
+        <i class="bi bi-trash"></i>
+    </a>
+    {% endif %}
+</div>
+
                             </td>
                         </tr>
                         {% empty %}

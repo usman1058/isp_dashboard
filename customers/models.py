@@ -16,6 +16,8 @@ class ServicePlan(models.Model):
 
     def __str__(self):
         return self.name
+    class Meta:
+        ordering = ['name'] 
 
 from django.db import models
 from django.utils import timezone
@@ -92,6 +94,10 @@ class Customer(models.Model):
         ordering = ['-join_date']
         verbose_name = "Customer"
         verbose_name_plural = "Customers"
+        permissions = [
+            ("export_customer", "Can export customer data"),
+            # Add other custom permissions here
+        ]
 
     def __str__(self):
         return f"{self.username} - {self.get_full_name()}"
@@ -228,6 +234,11 @@ class Payment(models.Model):
             self.amount = self.customer.service_plan.price
         super().save(*args, **kwargs)
     
+    class Meta:
+        permissions = [
+            ("generate_payment_challan", "Can generate payment challan"),
+        ]
+    
     def __str__(self):
         return f"Payment #{self.invoice_number} - {self.customer}"
     
@@ -266,7 +277,13 @@ class Expense(models.Model):
     date = models.DateField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.category.name} - ₹{self.amount}"
+        return f"{self.category.name} - Rs.{self.amount}"
+    
+    class Meta:
+        ordering = ['-date']
+        permissions = [
+            ("generate_expense_report", "Can generate expense report"),
+        ]
 
 
 

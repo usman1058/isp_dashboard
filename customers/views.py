@@ -6,12 +6,15 @@ from django.urls import reverse_lazy
 from .models import Customer, Payment, ServicePlan
 from .forms import CustomerForm, PaymentForm, ServicePlanForm
 from django.views.generic import FormView
+from django.contrib.auth.decorators import permission_required
 from django.urls import reverse_lazy
 from datetime import timedelta
 from django.utils import timezone
 from django.db.models import Sum
 from django.contrib import messages
 from .forms import BulkStatusUpdateForm
+from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
@@ -28,9 +31,70 @@ from django_filters.views import FilterView
 from .filters import *
 import phonenumbers
 from phonenumbers import PhoneNumberFormat
+from django.shortcuts import redirect
+from django.urls import reverse_lazy
+from django.contrib.auth.mixins import UserPassesTestMixin
 
+class PermissionRequiredMixin(UserPassesTestMixin):
+    """Redirect users to appropriate page instead of 403"""
+    permission_required = None
+    redirect_url = reverse_lazy('dashboard')  # Default fallback
+    
+    def get_redirect_url(self):
+        """Determine where to redirect based on user permissions"""
+        user = self.request.user
+        
+        # Check for common permissions and return appropriate URLs
+        if user.has_perm('customers.view_dashboard'):
+            return reverse_lazy('dashboard')
+        elif user.has_perm('customers.view_customer'):
+            return reverse_lazy('customer_list')
+        elif user.has_perm('customers.view_payment'):
+            return reverse_lazy('payment_list')
+        # Add more permission checks as needed
+        
+        return self.redirect_url
+    
+    def test_func(self):
+        if not self.request.user.is_authenticated:
+            return False
+        if self.permission_required is None:
+            return True
+        return self.request.user.has_perm(self.permission_required)
+    
+    def handle_no_permission(self):
+        messages.error(self.request, "You don't have permission to access this page.")
+        return redirect(self.get_redirect_url())
+    
+    
+from functools import wraps
+from django.shortcuts import redirect
+from django.urls import reverse_lazy
 
-class ServicePlanListView(LoginRequiredMixin, FilterView):
+def permission_required_with_redirect(perm, login_url=None):
+    def decorator(view_func):
+        @wraps(view_func)
+        def _wrapped_view(request, *args, **kwargs):
+            if request.user.has_perm(perm):
+                return view_func(request, *args, **kwargs)
+            
+            messages.error(request, "You don't have permission to access this page.")
+            
+            # Determine redirect URL based on permissions
+            if request.user.has_perm('customers.view_dashboard'):
+                return redirect('dashboard')
+            elif request.user.has_perm('customers.view_customer'):
+                return redirect('customer_list')
+            elif request.user.has_perm('customers.view_payment'):
+                return redirect('payment_list')
+            # Add more permission checks as needed
+            
+            return redirect(login_url or reverse_lazy('login'))
+        return _wrapped_view
+    return decorator
+
+class ServicePlanListView(PermissionRequiredMixin, FilterView):
+    permission_required = 'customers.view_serviceplan'
     model = ServicePlan
     template_name = 'customers/serviceplan_list.html'
     context_object_name = 'serviceplans'
@@ -47,31 +111,35 @@ class ServicePlanListView(LoginRequiredMixin, FilterView):
         return context
     
     
-class ServicePlanDetailView(LoginRequiredMixin, DetailView):
+class ServicePlanDetailView(PermissionRequiredMixin, DetailView):
+    permission_required = 'customers.view_serviceplan'
     model = ServicePlan
     template_name = 'customers/serviceplan_detail.html'
     context_object_name = 'serviceplan'
 
-class ServicePlanCreateView(LoginRequiredMixin, CreateView):
+class ServicePlanCreateView(PermissionRequiredMixin, CreateView):
+    permission_required = 'customers.add_serviceplan'
     model = ServicePlan
     form_class = ServicePlanForm
     template_name = 'customers/serviceplan_form.html'
     success_url = reverse_lazy('service_plan_list')
 
-class ServicePlanUpdateView(LoginRequiredMixin, UpdateView):
+class ServicePlanUpdateView(PermissionRequiredMixin, UpdateView):
+    permission_required = 'customers.change_serviceplan'
     model = ServicePlan
     form_class = ServicePlanForm
     template_name = 'customers/serviceplan_form.html'
     success_url = reverse_lazy('service_plan_list')
 
-class ServicePlanDeleteView(LoginRequiredMixin, DeleteView):
+class ServicePlanDeleteView(PermissionRequiredMixin, DeleteView):
+    permission_required = 'customers.delete_serviceplan'
     model = ServicePlan
     template_name = 'customers/serviceplan_confirm_delete.html'
     success_url = reverse_lazy('service_plan_list')
 
 
-
-class PaymentListView(LoginRequiredMixin, FilterView):
+class PaymentListView(PermissionRequiredMixin, FilterView):
+    permission_required = 'customers.view_payment'
     model = Payment
     template_name = 'customers/payment_list.html'
     context_object_name = 'payments'
@@ -88,12 +156,14 @@ class PaymentListView(LoginRequiredMixin, FilterView):
         return context
     
     
-class PaymentDetailView(LoginRequiredMixin, DetailView):
+class PaymentDetailView(PermissionRequiredMixin, DetailView):
+    permission_required = 'customers.view_payment'
     model = Payment
     template_name = 'customers/payment_detail.html'
     context_object_name = 'payment'
 
-class PaymentCreateView(LoginRequiredMixin, CreateView):
+class PaymentCreateView(PermissionRequiredMixin, CreateView):
+    permission_required = 'customers.add_payment'
     model = Payment
     form_class = PaymentForm
     template_name = 'customers/payment_form.html'
@@ -105,7 +175,8 @@ class PaymentCreateView(LoginRequiredMixin, CreateView):
 
 from django.urls import reverse_lazy
 
-class PaymentUpdateView(UpdateView):
+class PaymentUpdateView(PermissionRequiredMixin,UpdateView):
+    permission_required = 'customers.change_payment'
     model = Payment
     form_class = PaymentForm
     template_name = 'customers/payment_form.html'
@@ -113,13 +184,14 @@ class PaymentUpdateView(UpdateView):
     def get_success_url(self):
         return reverse_lazy('payment_status')
     
-class PaymentDeleteView(LoginRequiredMixin, DeleteView):
+class PaymentDeleteView(PermissionRequiredMixin, DeleteView):
+    permission_required = 'customers.delete_payment'
     model = Payment
     template_name = 'customers/payment_confirm_delete.html'
     success_url = reverse_lazy('payment_list')
 
 
-class BulkStatusUpdateView(LoginRequiredMixin, FormView):
+class BulkStatusUpdateView(PermissionRequiredMixin, FormView):
     template_name = 'customers/bulk_status_update.html'
     form_class = BulkStatusUpdateForm
     success_url = reverse_lazy('customer_list')
@@ -156,7 +228,8 @@ class CustomerFilter(django_filters.FilterSet):
         )
 
 
-class CustomerListView(LoginRequiredMixin, FilterView):
+class CustomerListView(PermissionRequiredMixin, FilterView):
+    permission_required = 'customers.view_customer'
     model = Customer
     template_name = 'customers/customer_list.html'
     context_object_name = 'customers'
@@ -186,7 +259,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from dateutil.relativedelta import relativedelta
 from .models import Customer, Payment
 
-class CustomerDetailView(LoginRequiredMixin, DetailView):
+class CustomerDetailView(PermissionRequiredMixin, DetailView):
+    permission_required = 'customers.view_customer'
     model = Customer
     template_name = 'customers/customer_detail.html'
 
@@ -262,19 +336,22 @@ class CustomerDetailView(LoginRequiredMixin, DetailView):
 
         return context
 
-class CustomerCreateView(LoginRequiredMixin, CreateView):
+class CustomerCreateView(PermissionRequiredMixin, CreateView):
+    permission_required = 'customers.add_customer'
     model = Customer
     form_class = CustomerForm
     template_name = 'customers/customer_form.html'
     success_url = reverse_lazy('customer_list')
 
-class CustomerUpdateView(LoginRequiredMixin, UpdateView):
+class CustomerUpdateView(PermissionRequiredMixin, UpdateView):
+    permission_required = 'customers.change_customer'
     model = Customer
     form_class = CustomerForm
     template_name = 'customers/customer_form.html'
     success_url = reverse_lazy('customer_list')
 
-class CustomerDeleteView(LoginRequiredMixin, DeleteView):
+class CustomerDeleteView(PermissionRequiredMixin, DeleteView):
+    permission_required = 'customers.delete_customer'
     model = Customer
     template_name = 'customers/customer_confirm_delete.html'
     success_url = reverse_lazy('customer_list')
@@ -290,6 +367,7 @@ from .models import Customer
 
 
 @login_required
+@permission_required_with_redirect('customers.edit_payment')
 def payment_status_view(request):
     today = date.today()
     selected_month = request.GET.get('month')
@@ -327,6 +405,7 @@ from calendar import month_name
 import json
 
 @login_required
+@permission_required_with_redirect('customers.view_expense')
 def expense_monthly_report_view(request):
     print("🔥 ENTERED expense_monthly_report_view")
     year = int(request.GET.get('year', date.today().year))
@@ -386,7 +465,8 @@ from django.db.models import Sum
 from datetime import date, timedelta
 import calendar
 import json
-
+@login_required
+@permission_required_with_redirect('customers.add_payment')
 def prefilled_payment_form(request, customer_id, year, month):
     customer = get_object_or_404(Customer, pk=customer_id)
     initial_data = {
@@ -420,6 +500,7 @@ from decimal import Decimal
 from django.db.models import Sum
 
 @login_required
+@permission_required_with_redirect('customers.view_expense')
 def expense_dashboard(request):
     form = ExpenseForm(request.POST or None)
     if form.is_valid():
@@ -461,6 +542,7 @@ from dateutil.relativedelta import relativedelta
 from datetime import timedelta
 
 @login_required
+@permission_required_with_redirect('customer.view_dashboard')
 def dashboard(request):
     today = timezone.now().date()
     year = today.year
@@ -808,6 +890,8 @@ def download_latest_db(request):
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Expense
 
+@login_required
+@permission_required_with_redirect('customers.delete_expense')
 def delete_expense(request, pk):
     expense = get_object_or_404(Expense, pk=pk)
 
@@ -820,6 +904,8 @@ from django.shortcuts import render, get_object_or_404, redirect
 from .models import Expense
 from .forms import ExpenseForm
 
+@login_required
+@permission_required_with_redirect('customers.change_expense')
 def edit_expense(request, pk):
     expense = get_object_or_404(Expense, pk=pk)
     if request.method == 'POST':

@@ -484,6 +484,7 @@
         <div class="collapse navbar-collapse" id="navbarMain">
             <ul class="navbar-nav me-auto">
                 <!-- Main nav items -->
+                {% if perms.customers.view_dashboard %}
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'dashboard' %}">
                         <i class="bi bi-people me-1"></i>
@@ -491,6 +492,9 @@
                         <div class="nav-underline"></div>
                     </a>
                 </li>
+                {% endif %}
+                
+                {% if perms.customers.view_customer %}
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'customer_list' %}">
                         <i class="bi bi-people me-1"></i>
@@ -498,6 +502,9 @@
                         <div class="nav-underline"></div>
                     </a>
                 </li>
+                {% endif %}
+                
+                {% if perms.customers.view_payment %}
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'payment_list' %}">
                         <i class="bi bi-credit-card me-1"></i>
@@ -505,6 +512,9 @@
                         <div class="nav-underline"></div>
                     </a>
                 </li>
+                {% endif %}
+                
+                {% if perms.customers.view_payment %}
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'payment_status' %}">
                         <i class="bi bi-check-circle me-1"></i>
@@ -512,6 +522,9 @@
                         <div class="nav-underline"></div>
                     </a>
                 </li>
+                {% endif %}
+                
+                {% if perms.customers.view_serviceplan %}
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'service_plan_list' %}">
                         <i class="bi bi-speedometer2 me-1"></i>
@@ -519,6 +532,9 @@
                         <div class="nav-underline"></div>
                     </a>
                 </li>
+                {% endif %}
+                
+                {% if perms.customers.view_expense %}
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'expense_dashboard' %}">
                         <i class="bi bi-pie-chart me-1"></i>
@@ -526,8 +542,10 @@
                         <div class="nav-underline"></div>
                     </a>
                 </li>
+                {% endif %}
 
                 <!-- Reports dropdown -->
+                {% if request.user.is_superuser %}
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="reportsDropdown" data-bs-toggle="dropdown">
                         <i class="bi bi-bar-chart me-1"></i>
@@ -535,13 +553,21 @@
                         <div class="nav-underline"></div>
                     </a>
                     <ul class="dropdown-menu">
+                        {% if perms.customers.view_payment %}
                         <li><a class="dropdown-item" href="{% url 'monthly_payment_report' %}"><i class="bi bi-wallet2 me-2"></i>Payment Report</a></li>
+                        {% endif %}
+                        {% if perms.customers.view_expense %}
                         <li><a class="dropdown-item" href="{% url 'expense_report' %}"><i class="bi bi-cash-stack me-2"></i>Expense Report</a></li>
+                        {% endif %}
+                        {% if perms.customers.view_customer %}
                         <li><a class="dropdown-item" href="{% url 'customer_growth_report' %}"><i class="bi bi-graph-up me-2"></i>Customer Growth</a></li>
+                        {% endif %}
+                        {% if perms.customers.download_backup %}
                         <li><a class="dropdown-item" href="{% url 'download_backup' %}"><i class="bi bi-download me-2"></i>Download Backup</a></li>
+                        {% endif %}
                     </ul>
-
                 </li>
+                {% endif %}
             </ul>
 
             <!-- User section -->
@@ -563,7 +589,6 @@
         </div>
     </div>
 </nav>
-
 
 
     <div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 1055;"></div>
