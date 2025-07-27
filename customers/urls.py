@@ -58,5 +58,8 @@ urlpatterns = [
     
     # Bulk operations
     path('customers/bulk-status/', BulkStatusUpdateView.as_view(), name='bulk_status_update'),
+    path('expense/edit/<int:pk>/', edit_expense, name='edit_expense'),
+    path('expense/delete/<int:pk>/', delete_expense, name='delete_expense'),
+
 
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

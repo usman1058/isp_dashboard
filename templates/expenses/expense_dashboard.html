@@ -316,7 +316,10 @@
                             <div class="card-body">
                                 <h6>{{ cat.category__name }}</h6>
                                 <h4 class="text-primary fw-semibold">Rs.{{ cat.total|floatformat:2 }}</h4>
-                                <p class="small text-muted mb-0">{{ cat.percentage|floatformat:1 }}% of total</p>
+                                <p class="small text-muted mb-0">
+    {{ cat.percentage|default:0|floatformat:1 }}% of total
+</p>
+
                             </div>
                         </div>
                     </a>
@@ -367,7 +370,24 @@
                                     {{ expense.description|default:"-" }}
                                 {% endif %}
                             </td>
-                            <td class="text-end amount-cell">{{ expense.amount|floatformat:2 }}</td>
+                            <td class="text-end amount-cell">
+    {{ expense.amount|floatformat:2 }}
+    <div class="mt-2 d-flex justify-content-end gap-1">
+        <a href="{% url 'edit_expense' expense.pk %}"
+           class="btn btn-sm btn-outline-warning hover-scale"
+           data-bs-toggle="tooltip"
+           title="Edit">
+            <i class="bi bi-pencil"></i>
+        </a>
+        <a href="{% url 'delete_expense' expense.pk %}"
+           class="btn btn-sm btn-outline-danger hover-scale"
+           data-bs-toggle="tooltip"
+           title="Delete">
+            <i class="bi bi-trash"></i>
+        </a>
+    </div>
+</td>
+
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -416,7 +436,22 @@
                                         {{ expense.description|default:"-" }}
                                     {% endif %}
                                 </td>
-                                <td class="text-end amount-cell">{{ expense.amount|floatformat:2 }}</td>
+                                <td class="text-end amount-cell">{{ expense.amount|floatformat:2 }}
+                                    <div class="mt-2 d-flex justify-content-end gap-1">
+        <a href="{% url 'edit_expense' expense.pk %}"
+           class="btn btn-sm btn-outline-warning hover-scale"
+           data-bs-toggle="tooltip"
+           title="Edit">
+            <i class="bi bi-pencil"></i>
+        </a>
+        <a href="{% url 'delete_expense' expense.pk %}"
+           class="btn btn-sm btn-outline-danger hover-scale"
+           data-bs-toggle="tooltip"
+           title="Delete">
+            <i class="bi bi-trash"></i>
+        </a>
+    </div>
+                                </td>
                             </tr>
                             {% endif %}
                         {% endfor %}
@@ -450,7 +485,7 @@
                     <tr>
                         <th>{{ cat.category__name }}</th>
                         <td class="text-end">Rs.{{ cat.total|floatformat:2 }}</td>
-                        <td class="text-muted text-end">{{ cat.percentage|floatformat:1 }}%</td>
+                        <td class="text-muted text-end">{{ cat.percentage|default:0|floatformat:1 }}%</td>
                     </tr>
                     {% endfor %}
                     <tr class="border-top">
@@ -482,6 +517,15 @@
 {% endblock %}
 
 {% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+            new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>
+
 <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>

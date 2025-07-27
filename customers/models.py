@@ -12,7 +12,6 @@ class ServicePlan(models.Model):
     name = models.CharField(max_length=100)
     speed = models.CharField(max_length=50)
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    monthly_limit = models.PositiveIntegerField(default="1")  # GB
     is_active = models.BooleanField(default=True)
 
     def __str__(self):

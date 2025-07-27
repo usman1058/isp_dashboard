@@ -130,10 +130,10 @@
         .progress-bar {
             transition: width 1s ease;
         }
-
+/* 
         .animate__animated {
             animation-duration: 0.6s;
-        }
+        } */
     </style>
 
     <style>
@@ -974,15 +974,6 @@ function showToast(message, type = 'success') {
                 });
             });
 
-            // Animate table rows on hover
-            $('tbody tr').hover(
-                function () {
-                    $(this).addClass('animate__animated animate__pulse');
-                },
-                function () {
-                    $(this).removeClass('animate__animated animate__pulse');
-                }
-            );
         });
     </script>
     <script>

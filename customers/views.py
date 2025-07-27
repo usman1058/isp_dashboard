@@ -39,7 +39,7 @@ class ServicePlanListView(LoginRequiredMixin, FilterView):
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        return queryset.order_by('name')
+        return queryset.order_by('-name')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -416,6 +416,9 @@ from .models import Expense, ExpenseCategory
 from .forms import ExpenseForm
 from django.db.models import Sum
 
+from decimal import Decimal
+from django.db.models import Sum
+
 @login_required
 def expense_dashboard(request):
     form = ExpenseForm(request.POST or None)
@@ -426,11 +429,19 @@ def expense_dashboard(request):
     expenses = Expense.objects.select_related('category').order_by('-date')
     total_expense = expenses.aggregate(Sum('amount'))['amount__sum'] or 0
 
-    category_totals = (
+    # First, get category totals
+    category_totals = list(
         Expense.objects.values('category__name')
         .annotate(total=Sum('amount'))
         .order_by('-total')
     )
+
+    # Then, add percentage field to each category
+    for cat in category_totals:
+        if total_expense > 0:
+            cat['percentage'] = (Decimal(cat['total']) / Decimal(total_expense)) * 100
+        else:
+            cat['percentage'] = 0
 
     context = {
         'form': form,
@@ -439,7 +450,6 @@ def expense_dashboard(request):
         'category_totals': category_totals,
     }
     return render(request, 'expenses/expense_dashboard.html', context)
-
 
 
 from django.shortcuts import render
@@ -793,3 +803,31 @@ def download_latest_db(request):
 
     response = FileResponse(open(db_path, 'rb'), as_attachment=True, filename=filename)
     return response
+
+
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import Expense
+
+def delete_expense(request, pk):
+    expense = get_object_or_404(Expense, pk=pk)
+
+    if request.method == 'POST':
+        expense.delete()
+        return redirect('expense_dashboard')  # Replace with your actual view name
+
+    return render(request, 'expenses/delete_expence.html', {'expense': expense})
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import Expense
+from .forms import ExpenseForm
+
+def edit_expense(request, pk):
+    expense = get_object_or_404(Expense, pk=pk)
+    if request.method == 'POST':
+        form = ExpenseForm(request.POST, instance=expense)
+        if form.is_valid():
+            form.save()
+            return redirect('expense_dashboard')  # change this to your main expense page name
+    else:
+        form = ExpenseForm(instance=expense)
+    return render(request, 'expenses/edit_expense.html', {'form': form, 'expense': expense})
+
