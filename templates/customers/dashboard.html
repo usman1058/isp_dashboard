@@ -3,6 +3,94 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
+<div class="modal fade" id="allUpcomingModal" tabindex="-1" aria-labelledby="allUpcomingModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="allUpcomingModalLabel">All Upcoming Payments (Next 7 Days)</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th class="ps-4">Customer</th>
+                <th>Due Month</th>
+                <th>Amount</th>
+                <th>Due Date</th>
+                <th>Days Left</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for record in all_upcoming_due_customers %}
+<tr>
+  <td class="ps-4">
+    <div class="d-flex align-items-center">
+      <div class="avatar avatar-sm bg-light-primary rounded-circle me-3">
+        <span class="avatar-text">{{ record.customer.first_name|first }}{{ record.customer.last_name|first }}</span>
+      </div>
+      <div>
+        <h6 class="mb-0">{{ record.customer.first_name }} {{ record.customer.last_name }}</h6>
+        <small class="text-muted">{{ record.customer.username }}</small>
+      </div>
+    </div>
+  </td>
+  <td>{{ record.due_month }}</td>
+  <td>Rs.{{ record.amount }}</td>
+  <td>
+    <span class="badge {% if record.days_left == 0 %}bg-danger{% elif record.days_left <= 2 %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+      {{ record.due_date|date:"M d, Y" }}
+    </span>
+  </td>
+  <td>
+    <span class="{% if record.days_left == 0 %}text-danger fw-bold{% elif record.days_left <= 2 %}text-warning{% endif %}">
+      {{ record.days_left }} day{{ record.days_left|pluralize }}
+    </span>
+  </td>
+  <td class="text-end pe-4">
+    <div class="btn-group" role="group">
+      <!-- Pay Now Button -->
+      <a href="{% url 'payment_add_prefilled' record.customer.id record.due_date.year record.due_date.month %}"
+         class="btn btn-sm btn-success me-2" title="Pay Now">
+        <i class="bi bi-cash-coin me-1"></i> Pay
+      </a>
+
+      <!-- WhatsApp Now -->
+      <button class="btn btn-sm btn-primary instant-send-btn me-2"
+              data-customer-id="{{ record.customer.id }}"
+              data-due-date="{{ record.due_date|date:'Y-m-d' }}"
+              title="Open WhatsApp now">
+        <i class="bi bi-whatsapp"></i>
+      </button>
+
+      <!-- Schedule for later -->
+      <button class="btn btn-sm btn-outline-secondary schedule-btn"
+              data-customer-id="{{ record.customer.id }}"
+              data-due-date="{{ record.due_date|date:'Y-m-d' }}"
+              title="Schedule for later">
+        <i class="bi bi-clock"></i>
+      </button>
+    </div>
+  </td>
+</tr>
+
+              {% empty %}
+              <tr>
+                <td colspan="5" class="text-center text-muted py-4">No upcoming customers</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="container mt-4 animate__animated animate__fadeIn">
     <h1 class="mb-4 text-dark fw-bold">Dashboard Overview</h1>
 
@@ -161,6 +249,12 @@
                       style="animation-duration: 2s">
                     {{ upcoming_due_customers|length }}
                 </span>
+                <div class="text-end px-4 ">
+    <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#allUpcomingModal">
+        <i class="bi bi-eye"></i> View All
+    </button>
+</div>
+
                 
             </div>
         </div>
@@ -244,9 +338,11 @@
             </div>
             {% endif %}
         </div>
+        
 
     </div>
 
+    
 <!-- <div class="card shadow-lg border-0 mt-4 animate__animated animate__fadeInUp">
     <div class="card-header bg-white d-flex justify-content-between align-items-center border-bottom">
         <h5 class="mb-0 fw-bold text-dark">

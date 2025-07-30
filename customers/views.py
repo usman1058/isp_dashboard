@@ -540,6 +540,7 @@ from django.contrib.auth.decorators import login_required
 from .models import Customer, Payment
 from dateutil.relativedelta import relativedelta
 from datetime import timedelta
+from django.core.paginator import Paginator
 
 @login_required
 @permission_required_with_redirect('customer.view_dashboard')
@@ -619,18 +620,29 @@ def dashboard(request):
                     'amount': customer.service_plan.price,
                     'days_left': days_left
                 })
+    paginator = Paginator(due_soon, 10)  # Show 10 per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    # Sort due_soon by days_left ascending
+    due_soon_sorted = sorted(due_soon, key=lambda x: x['days_left'])
+
+    # Show only top 7 on dashboard
+    upcoming_limited = due_soon_sorted[:7]
 
     context = {
-        'upcoming_due_customers': due_soon,
-        'total_customers': total_customers,
-        'total_payments': total_payments,
-        'expected_payments': expected_payments,
-        'payment_collection_percentage': payment_collection_percentage,
-        'recent_payments': recent_payments,
-        'paid_count': len(paid_customers),
-        'unpaid_count': len(unpaid_customers),
-        'current_month': today.strftime('%B %Y')
-    }
+    'upcoming_due_customers': upcoming_limited,  # Only top 7
+    'all_upcoming_due_customers': due_soon_sorted,  # Full sorted list for modal
+    'total_customers': total_customers,
+    'total_payments': total_payments,
+    'expected_payments': expected_payments,
+    'payment_collection_percentage': payment_collection_percentage,
+    'recent_payments': recent_payments,
+    'paid_count': len(paid_customers),
+    'unpaid_count': len(unpaid_customers),
+    'current_month': today.strftime('%B %Y')
+}
+
+
 
     return render(request, 'customers/dashboard.html', context)
 
@@ -742,7 +754,7 @@ def send_whatsapp_reminder(customer, due_date, amount, action_type="instant", se
         # Prepare message
         message = (
             f"Dear {customer.first_name},\n\n"
-            f"Your payment of ₹{amount} for {due_date.strftime('%B %Y')} is due.\n"
+            f"Your payment of Rs{amount} for {due_date.strftime('%B %Y')} is due.\n"
             f"Please make the payment at your earliest convenience.\n\n"
             f"Thank you!"
         )
