@@ -464,15 +464,24 @@ from django.db.models.functions import TruncMonth
 from django.db.models import Sum
 from datetime import date, timedelta
 import calendar
+from django.contrib import messages
 import json
 @login_required
 @permission_required_with_redirect('customers.add_payment')
 def prefilled_payment_form(request, customer_id, year, month):
     customer = get_object_or_404(Customer, pk=customer_id)
+    payment_month = date(year, month, 1)
+
+    # Check if payment already exists
+    existing_payment = Payment.objects.filter(customer=customer, month_for=payment_month).first()
+    if existing_payment:
+        messages.warning(request, "Payment for this customer and month already exists.")
+        return redirect('payment_challan', pk=existing_payment.pk)
+
     initial_data = {
         'customer': customer,
         'amount': customer.service_plan.price,
-        'month_for': date(year, month, 1),
+        'month_for': payment_month,
         'payment_date': date.today(),
     }
 
@@ -486,8 +495,8 @@ def prefilled_payment_form(request, customer_id, year, month):
                 import uuid
                 payment.invoice_number = f"INV-{uuid.uuid4().hex[:8].upper()}"
             payment.save()
-            return redirect('payment_status')
-
+            messages.success(request, "Payment successfully created.")
+            return redirect('payment_challan', pk=payment.pk)
 
     return render(request, 'customers/payment_form.html', {'form': form})
 
@@ -577,7 +586,36 @@ def dashboard(request):
 
     # Recent payments
     recent_payments = Payment.objects.order_by('-payment_date')[:5]
+    # Overdue customers (due date passed and payment not done)
+    overdue_customers = []
+    for customer in Customer.objects.filter(
+        service_plan__isnull=False,
+        service_installation_date__isnull=False
+    ).select_related('service_plan'):
+        installation_date = customer.service_installation_date
 
+        months_since = (today.year - installation_date.year) * 12 + \
+                    (today.month - installation_date.month)
+        last_due_date = installation_date + relativedelta(months=months_since)
+
+        if last_due_date > today:
+            last_due_date -= relativedelta(months=1)
+
+        if last_due_date < today:
+            if not customer.payments.filter(
+                month_for__year=last_due_date.year,
+                month_for__month=last_due_date.month
+            ).exists():
+                days_overdue = (today - last_due_date).days
+                overdue_customers.append({
+                    'customer': customer,
+                    'due_date': last_due_date,
+                    'due_month': last_due_date.strftime('%B %Y'),
+                    'amount': customer.service_plan.price,
+                    'days_overdue': days_overdue
+                })
+
+    overdue_customers_sorted = sorted(overdue_customers, key=lambda x: x['days_overdue'])
     # Payment status
     paid_customers = []
     unpaid_customers = []
@@ -635,11 +673,13 @@ def dashboard(request):
     'total_customers': total_customers,
     'total_payments': total_payments,
     'expected_payments': expected_payments,
+    'overdue_customers': overdue_customers,
     'payment_collection_percentage': payment_collection_percentage,
     'recent_payments': recent_payments,
     'paid_count': len(paid_customers),
     'unpaid_count': len(unpaid_customers),
-    'current_month': today.strftime('%B %Y')
+    'current_month': today.strftime('%B %Y'),
+    'overdue_customers': overdue_customers_sorted,
 }
 
 
