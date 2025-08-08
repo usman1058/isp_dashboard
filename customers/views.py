@@ -553,6 +553,8 @@ from django.core.paginator import Paginator
 
 @login_required
 @permission_required_with_redirect('customer.view_dashboard')
+@login_required
+@permission_required_with_redirect('customer.view_dashboard')
 def dashboard(request):
     today = timezone.now().date()
     year = today.year
@@ -560,25 +562,25 @@ def dashboard(request):
 
     # Calculate metrics
     total_customers = Customer.objects.count()
-    
+
     # Current month payments
     current_month_payments = Payment.objects.filter(
         payment_date__year=year,
         payment_date__month=month
     )
     total_payments = current_month_payments.aggregate(total=Sum('amount'))['total'] or 0
-    
+
     # Expected payments calculation
     active_customers = Customer.objects.filter(
         service_plan__isnull=False,
         status='active'
     )
     expected_payments = sum(
-        customer.service_plan.price 
-        for customer in active_customers 
+        customer.service_plan.price
+        for customer in active_customers
         if customer.service_plan
     ) or 0
-    
+
     # Collection percentage
     payment_collection_percentage = 0
     if expected_payments > 0:
@@ -586,7 +588,8 @@ def dashboard(request):
 
     # Recent payments
     recent_payments = Payment.objects.order_by('-payment_date')[:5]
-    # Overdue customers (due date passed and payment not done)
+
+    # Overdue customers (ONLY for current month)
     overdue_customers = []
     for customer in Customer.objects.filter(
         service_plan__isnull=False,
@@ -594,28 +597,28 @@ def dashboard(request):
     ).select_related('service_plan'):
         installation_date = customer.service_installation_date
 
-        months_since = (today.year - installation_date.year) * 12 + \
-                    (today.month - installation_date.month)
-        last_due_date = installation_date + relativedelta(months=months_since)
+        # Calculate expected due date for current month
+        months_since = (year - installation_date.year) * 12 + (month - installation_date.month)
+        due_date = installation_date + relativedelta(months=months_since)
 
-        if last_due_date > today:
-            last_due_date -= relativedelta(months=1)
-
-        if last_due_date < today:
+        # Make sure due_date is in the same month as today
+        if due_date.year == year and due_date.month == month:
             if not customer.payments.filter(
-                month_for__year=last_due_date.year,
-                month_for__month=last_due_date.month
+                month_for__year=year,
+                month_for__month=month
             ).exists():
-                days_overdue = (today - last_due_date).days
-                overdue_customers.append({
-                    'customer': customer,
-                    'due_date': last_due_date,
-                    'due_month': last_due_date.strftime('%B %Y'),
-                    'amount': customer.service_plan.price,
-                    'days_overdue': days_overdue
-                })
+                days_overdue = (today - due_date).days
+                if days_overdue > 0:  # Only count if it's actually overdue
+                    overdue_customers.append({
+                        'customer': customer,
+                        'due_date': due_date,
+                        'due_month': due_date.strftime('%B %Y'),
+                        'amount': customer.service_plan.price,
+                        'days_overdue': days_overdue
+                    })
 
     overdue_customers_sorted = sorted(overdue_customers, key=lambda x: x['days_overdue'])
+
     # Payment status
     paid_customers = []
     unpaid_customers = []
@@ -625,32 +628,31 @@ def dashboard(request):
         else:
             unpaid_customers.append(customer)
 
-    # Upcoming due customers
+    # Upcoming due customers (for next 7 days)
     due_soon = []
-    reminder_window = 7  # Show payments due within next 7 days
+    reminder_window = 7
 
     for customer in Customer.objects.filter(
         service_plan__isnull=False,
         service_installation_date__isnull=False
     ).select_related('service_plan'):
         installation_date = customer.service_installation_date
-        
-        months_since = (today.year - installation_date.year) * 12 + \
-                      (today.month - installation_date.month)
+
+        months_since = (year - installation_date.year) * 12 + (month - installation_date.month)
         next_due_date = installation_date + relativedelta(months=months_since)
-        
+
         if next_due_date < today:
             next_due_date += relativedelta(months=1)
-        
+
         show_from_date = next_due_date - timedelta(days=reminder_window)
-        
+
         if show_from_date <= today <= next_due_date:
             if not customer.payments.filter(
                 month_for__year=next_due_date.year,
                 month_for__month=next_due_date.month
             ).exists():
                 days_left = (next_due_date - today).days
-                
+
                 due_soon.append({
                     'customer': customer,
                     'due_date': next_due_date,
@@ -658,33 +660,29 @@ def dashboard(request):
                     'amount': customer.service_plan.price,
                     'days_left': days_left
                 })
-    paginator = Paginator(due_soon, 10)  # Show 10 per page
+
+    due_soon_sorted = sorted(due_soon, key=lambda x: x['days_left'])
+    upcoming_limited = due_soon_sorted[:7]
+    paginator = Paginator(due_soon, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    # Sort due_soon by days_left ascending
-    due_soon_sorted = sorted(due_soon, key=lambda x: x['days_left'])
-
-    # Show only top 7 on dashboard
-    upcoming_limited = due_soon_sorted[:7]
 
     context = {
-    'upcoming_due_customers': upcoming_limited,  # Only top 7
-    'all_upcoming_due_customers': due_soon_sorted,  # Full sorted list for modal
-    'total_customers': total_customers,
-    'total_payments': total_payments,
-    'expected_payments': expected_payments,
-    'overdue_customers': overdue_customers,
-    'payment_collection_percentage': payment_collection_percentage,
-    'recent_payments': recent_payments,
-    'paid_count': len(paid_customers),
-    'unpaid_count': len(unpaid_customers),
-    'current_month': today.strftime('%B %Y'),
-    'overdue_customers': overdue_customers_sorted,
-}
-
-
+        'upcoming_due_customers': upcoming_limited,
+        'all_upcoming_due_customers': due_soon_sorted,
+        'total_customers': total_customers,
+        'total_payments': total_payments,
+        'expected_payments': expected_payments,
+        'overdue_customers': overdue_customers_sorted,  # ✅ now filtered for current month only
+        'payment_collection_percentage': payment_collection_percentage,
+        'recent_payments': recent_payments,
+        'paid_count': len(paid_customers),
+        'unpaid_count': len(unpaid_customers),
+        'current_month': today.strftime('%B %Y'),
+    }
 
     return render(request, 'customers/dashboard.html', context)
+
 
 import logging
 import phonenumbers
