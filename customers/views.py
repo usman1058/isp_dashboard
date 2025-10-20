@@ -506,7 +506,6 @@ from .forms import ExpenseForm
 from django.db.models import Sum
 
 from decimal import Decimal
-from django.db.models import Sum
 
 @login_required
 @permission_required_with_redirect('customers.view_expense')
@@ -516,28 +515,50 @@ def expense_dashboard(request):
         form.save()
         return redirect('expense_dashboard')
 
-    expenses = Expense.objects.select_related('category').order_by('-date')
+    # --- Month/Year Filter ---
+    today = date.today()
+    selected_month = int(request.GET.get('month', today.month))
+    selected_year = int(request.GET.get('year', today.year))
+
+    expenses = (
+        Expense.objects
+        .select_related('category')
+        .filter(date__month=selected_month, date__year=selected_year)
+        .order_by('-date')
+    )
+
     total_expense = expenses.aggregate(Sum('amount'))['amount__sum'] or 0
 
-    # First, get category totals
+    # Category Totals for filtered data
     category_totals = list(
-        Expense.objects.values('category__name')
+        expenses.values('category__name')
         .annotate(total=Sum('amount'))
         .order_by('-total')
     )
 
-    # Then, add percentage field to each category
     for cat in category_totals:
         if total_expense > 0:
             cat['percentage'] = (Decimal(cat['total']) / Decimal(total_expense)) * 100
         else:
             cat['percentage'] = 0
 
+    # For dropdown options in template
+    months = [
+        (1, 'January'), (2, 'February'), (3, 'March'), (4, 'April'),
+        (5, 'May'), (6, 'June'), (7, 'July'), (8, 'August'),
+        (9, 'September'), (10, 'October'), (11, 'November'), (12, 'December'),
+    ]
+    years = list(range(today.year - 3, today.year + 1))
+
     context = {
         'form': form,
         'expenses': expenses,
         'total_expense': total_expense,
         'category_totals': category_totals,
+        'months': months,
+        'years': years,
+        'selected_month': selected_month,
+        'selected_year': selected_year,
     }
     return render(request, 'expenses/expense_dashboard.html', context)
 

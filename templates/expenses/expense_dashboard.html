@@ -336,6 +336,26 @@
                 <i class="bi bi-table me-2"></i>All Expenses
             </h5>
             <div class="d-flex align-items-center">
+    <form method="get" class="d-flex align-items-center">
+        <label for="month" class="me-2 small text-muted">Month:</label>
+        <select name="month" id="month" class="form-select form-select-sm me-2 w-auto" onchange="this.form.submit()">
+            {% for num, name in months %}
+                <option value="{{ num }}" {% if num == selected_month %}selected{% endif %}>{{ name }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="year" class="me-2 small text-muted">Year:</label>
+        <select name="year" id="year" class="form-select form-select-sm me-2 w-auto" onchange="this.form.submit()">
+            {% for y in years %}
+                <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>{{ y }}</option>
+            {% endfor %}
+        </select>
+
+        <noscript><button type="submit" class="btn btn-sm btn-primary">Filter</button></noscript>
+    </form>
+</div>
+
+            <div class="d-flex align-items-center">
                 <span class="me-2 small text-muted">Filter:</span>
                 <select id="categoryFilter" class="form-select form-select-sm w-auto">
                     <option value="all">All Categories</option>
