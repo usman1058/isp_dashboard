@@ -314,7 +314,10 @@ class CustomerDetailView(PermissionRequiredMixin, DetailView):
 
 # Calculate due date using install day
                 due_day = customer.service_installation_date.day
-                due_date = month.replace(day=due_day)
+                last_day_of_month = calendar.monthrange(month.year, month.month)[1]
+                safe_day = min(due_day, last_day_of_month)
+
+                due_date = month.replace(day=safe_day)
 
                 history.append({
                     'month': month,
