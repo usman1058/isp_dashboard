@@ -46,7 +46,7 @@ class Customer(models.Model):
     # Basic Information
     username = models.CharField(
         max_length=50,
-        unique=True,
+        unique=False,
         help_text="Unique username for customer login"
     )
     first_name = models.CharField(max_length=100)

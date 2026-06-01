@@ -27,7 +27,7 @@ class CustomerForm(forms.ModelForm):
         widgets = {
             'join_date': forms.DateInput(attrs={'type': 'date'}),
             'service_installation_date': forms.DateInput(attrs={'type': 'date'}),
-            'username': forms.TextInput(attrs={'placeholder': 'Unique customer username'}),
+            'username': forms.TextInput(attrs={'placeholder': 'Will be generated from email if blank'}),
             'address_area': forms.TextInput(attrs={'placeholder': 'e.g., North District'}),
             'street_name': forms.TextInput(attrs={'placeholder': 'e.g., Main Street'}),
             'street_num': forms.TextInput(attrs={'placeholder': 'e.g., 123'}),
@@ -42,7 +42,7 @@ class CustomerForm(forms.ModelForm):
             }),
         }
         help_texts = {
-            'username': 'Unique identifier for this customer',
+            'username': 'Leave blank to auto-generate from email',
             'address_area': 'Area or locality name',
             'street_name': 'Street or road name',
             'street_num': 'Street number or building number',
@@ -54,6 +54,9 @@ class CustomerForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['service_plan'].queryset = ServicePlan.objects.filter(is_active=True)
+        
+        # Make username optional - will be auto-generated from email
+        self.fields['username'].required = False
         
         # Make ID card fields optional, all others required
         self.fields['id_card_front'].required = False
@@ -76,10 +79,14 @@ class CustomerForm(forms.ModelForm):
     
     def clean_username(self):
         username = self.cleaned_data.get('username')
+        if not username:
+            email = self.cleaned_data.get('email', '')
+            username = email.split('@')[0] if email else ''
         return username
     
     def clean(self):
         cleaned_data = super().clean()
+        email = cleaned_data.get('email')
         username = cleaned_data.get('username')
         
         # Ensure username is unique
