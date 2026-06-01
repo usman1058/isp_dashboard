@@ -316,3 +316,4 @@ class WhatsAppMessage(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     whatsapp_id = models.CharField(max_length=100, blank=True, null=True)  # WhatsApp's message ID
     error = models.TextField(blank=True, null=True)
+
