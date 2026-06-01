@@ -587,10 +587,10 @@ def dashboard(request):
     # Calculate metrics
     total_customers = Customer.objects.count()
 
-    # Current month payments
+    # Current month payments (using month_for to count payments for the month, not when they were received)
     current_month_payments = Payment.objects.filter(
-        payment_date__year=year,
-        payment_date__month=month
+        month_for__year=year,
+        month_for__month=month
     )
     total_payments = current_month_payments.aggregate(total=Sum('amount'))['total'] or 0
 

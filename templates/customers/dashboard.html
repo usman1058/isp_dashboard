@@ -18,6 +18,7 @@
             <thead class="table-light">
               <tr>
                 <th class="ps-4">Customer</th>
+                <th>Username</th>
                 <th>Due Month</th>
                 <th>Amount</th>
                 <th>Due Date</th>
@@ -35,10 +36,11 @@
                     </div>
                     <div>
                       <h6 class="mb-0">{{ record.customer.first_name }} {{ record.customer.last_name }}</h6>
-                      <small class="text-muted">{{ record.customer.username }}</small>
+                      <small class="text-muted">{{ record.customer.phone }}</small>
                     </div>
                   </div>
                 </td>
+                <td><span class="badge bg-danger">{{ record.customer.username }}</span></td>
                 <td>{{ record.due_month }}</td>
                 <td>Rs.{{ record.amount }}</td>
                 <td>
@@ -100,6 +102,7 @@
             <thead class="table-light">
               <tr>
                 <th class="ps-4">Customer</th>
+                <th>Username</th>
                 <th>Due Month</th>
                 <th>Amount</th>
                 <th>Due Date</th>
@@ -116,10 +119,11 @@
       </div>
       <div>
         <h6 class="mb-0">{{ record.customer.first_name }} {{ record.customer.last_name }}</h6>
-        <small class="text-muted">{{ record.customer.username }}</small>
+        <small class="text-muted">{{ record.customer.phone }}</small>
       </div>
     </div>
   </td>
+  <td><span class="badge bg-info">{{ record.customer.username }}</span></td>
   <td>{{ record.due_month }}</td>
   <td>Rs.{{ record.amount }}</td>
   <td>
@@ -562,6 +566,7 @@
                         <tr>
                             <th class="ps-4">Date</th>
                             <th>Customer</th>
+                            <th>Username</th>
                             <th>Amount</th>
                             <th>Method</th>
                             <th class="pe-4 text-end">Receipt</th>
@@ -583,6 +588,7 @@
                                 </div>
                             </td>
                             <td>{{ payment.customer }}</td>
+                            <td><span class="badge bg-info">{{ payment.customer.username }}</span></td>
                             <td class="fw-bold">Rs.{{ payment.amount|floatformat:2 }}</td>
                             <td>
                                 <span class="badge bg-{% if payment.method == 'cash' %}success{% else %}primary{% endif %} bg-opacity-10 text-{% if payment.method == 'cash' %}success{% else %}primary{% endif %}">

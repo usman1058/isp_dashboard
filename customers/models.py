@@ -56,6 +56,20 @@ class Customer(models.Model):
     # Contact Information
     phone = models.CharField(max_length=20)
     
+    # Address Information
+    address_area = models.CharField(max_length=100, blank=True, null=True)
+    street_name = models.CharField(max_length=100, blank=True, null=True)
+    street_num = models.CharField(max_length=50, blank=True, null=True)
+    house_num = models.CharField(max_length=50, blank=True, null=True)
+    
+    # Service Details
+    modem_type = models.CharField(
+        max_length=20,
+        choices=[('free', 'Free'), ('paid', 'Paid')],
+        default='free',
+        help_text="Whether modem is free or paid"
+    )
+    
     # Service Information
     service_plan = models.ForeignKey(
         'ServicePlan', 

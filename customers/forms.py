@@ -27,8 +27,11 @@ class CustomerForm(forms.ModelForm):
         widgets = {
             'join_date': forms.DateInput(attrs={'type': 'date'}),
             'service_installation_date': forms.DateInput(attrs={'type': 'date'}),
-            'notes': forms.Textarea(attrs={'rows': 3}),
-            'username': forms.TextInput(attrs={'placeholder': 'Will be generated from username if blank'}),
+            'username': forms.TextInput(attrs={'placeholder': 'Unique customer username'}),
+            'address_area': forms.TextInput(attrs={'placeholder': 'e.g., North District'}),
+            'street_name': forms.TextInput(attrs={'placeholder': 'e.g., Main Street'}),
+            'street_num': forms.TextInput(attrs={'placeholder': 'e.g., 123'}),
+            'house_num': forms.TextInput(attrs={'placeholder': 'e.g., House #5'}),
             'id_card_front': forms.ClearableFileInput(attrs={
                 'accept': 'image/jpeg, image/png',
                 'class': 'file-upload'
@@ -39,7 +42,11 @@ class CustomerForm(forms.ModelForm):
             }),
         }
         help_texts = {
-            'username': 'Leave blank to auto-generate from username',
+            'username': 'Unique identifier for this customer',
+            'address_area': 'Area or locality name',
+            'street_name': 'Street or road name',
+            'street_num': 'Street number or building number',
+            'house_num': 'House number or unit',
             'id_card_front': 'Upload front side of ID card (JPEG/PNG)',
             'id_card_back': 'Upload back side of ID card (JPEG/PNG)',
         }
@@ -48,7 +55,7 @@ class CustomerForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['service_plan'].queryset = ServicePlan.objects.filter(is_active=True)
         
-        # Make ID card fields optional
+        # Make ID card fields optional, all others required
         self.fields['id_card_front'].required = False
         self.fields['id_card_back'].required = False
         
@@ -59,6 +66,13 @@ class CustomerForm(forms.ModelForm):
         self.fields['id_card_back'].validators = [
             FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png'])
         ]
+        
+        # Make new address fields required
+        self.fields['address_area'].required = True
+        self.fields['street_name'].required = True
+        self.fields['street_num'].required = True
+        self.fields['house_num'].required = True
+        self.fields['modem_type'].required = True
     
     def clean_username(self):
         username = self.cleaned_data.get('username')
