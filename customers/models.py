@@ -100,6 +100,9 @@ class Customer(models.Model):
         null=True
     )
 
+    # Notes
+    notes = models.TextField(blank=True, null=True, help_text="Optional notes about the customer")
+
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

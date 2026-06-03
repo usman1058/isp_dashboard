@@ -81,24 +81,6 @@
                         <div class="list-group-item border-0 px-0 py-2">
                             <div class="d-flex align-items-center">
                                 <div class="avatar avatar-sm bg-light-primary rounded me-3">
-                                    <i class="bi bi-envelope text-primary"></i>
-                                </div>
-                                <div>
-                                    <p class="mb-0 small text-muted">Email</p>
-                                    <p class="mb-0">
-                                        {% if customer.email %}
-                                        <a href="mailto:{{ customer.email }}">{{ customer.email }}</a>
-                                        {% else %}
-                                        <span class="text-muted">Not provided</span>
-                                        {% endif %}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="list-group-item border-0 px-0 py-2">
-                            <div class="d-flex align-items-center">
-                                <div class="avatar avatar-sm bg-light-primary rounded me-3">
                                     <i class="bi bi-telephone text-primary"></i>
                                 </div>
                                 <div>
@@ -115,19 +97,87 @@
                         </div>
 
                         <div class="list-group-item border-0 px-0 py-2">
-                            <div class="d-flex align-items-center">
-                                <div class="avatar avatar-sm bg-light-primary rounded me-3">
+                            <div class="d-flex align-items-start">
+                                <div class="avatar avatar-sm bg-light-primary rounded me-3 mt-1">
                                     <i class="bi bi-geo-alt text-primary"></i>
                                 </div>
+                                <div class="flex-grow-1">
+                                    <p class="mb-2 small text-muted">Address</p>
+                                    {% if customer.address_area or customer.street_name or customer.street_num or customer.house_num %}
+                                    <div class="card border bg-light bg-opacity-50 rounded-3">
+                                        <div class="card-body py-2 px-3">
+                                            <div class="row g-2">
+                                                {% if customer.address_area %}
+                                                <div class="col-12">
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="bi bi-pin-map text-primary me-2 small"></i>
+                                                        <span class="small text-muted me-1">Area:</span>
+                                                        <span class="fw-semibold">{{ customer.address_area }}</span>
+                                                    </div>
+                                                </div>
+                                                {% endif %}
+                                                {% if customer.street_name %}
+                                                <div class="col-sm-6">
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="bi bi-signpost-2 text-primary me-2 small"></i>
+                                                        <span class="small text-muted me-1">Street:</span>
+                                                        <span class="fw-semibold">{{ customer.street_name }}</span>
+                                                    </div>
+                                                </div>
+                                                {% endif %}
+                                                {% if customer.street_num %}
+                                                <div class="col-sm-6">
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="bi bi-hash text-primary me-2 small"></i>
+                                                        <span class="small text-muted me-1">St #:</span>
+                                                        <span class="fw-semibold">{{ customer.street_num }}</span>
+                                                    </div>
+                                                </div>
+                                                {% endif %}
+                                                {% if customer.house_num %}
+                                                <div class="col-sm-6">
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="bi bi-house-door text-primary me-2 small"></i>
+                                                        <span class="small text-muted me-1">House:</span>
+                                                        <span class="fw-semibold">#{{ customer.house_num }}</span>
+                                                    </div>
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% else %}
+                                    <span class="text-muted">Not provided</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="list-group-item border-0 px-0 py-2">
+                            <div class="d-flex align-items-center">
+                                <div class="avatar avatar-sm bg-light-primary rounded me-3">
+                                    <i class="bi bi-router text-primary"></i>
+                                </div>
                                 <div>
-                                    <p class="mb-0 small text-muted">Address</p>
+                                    <p class="mb-0 small text-muted">Modem Type</p>
                                     <p class="mb-0">
-                                        {% if customer.address %}
-                                        {{ customer.address|linebreaksbr }}
-                                        {% else %}
-                                        <span class="text-muted">Not provided</span>
-                                        {% endif %}
+                                        <span class="badge bg-{% if customer.modem_type == 'free' %}info{% else %}warning{% endif %} bg-opacity-10 text-{% if customer.modem_type == 'free' %}info{% else %}warning{% endif %}">
+                                            <i class="bi bi-{% if customer.modem_type == 'free' %}gift{% else %}cash{% endif %} me-1"></i>
+                                            {{ customer.get_modem_type_display }}
+                                        </span>
                                     </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="list-group-item border-0 px-0 py-2">
+                            <div class="d-flex align-items-center">
+                                <div class="avatar avatar-sm bg-light-primary rounded me-3">
+                                    <i class="bi bi-calendar-event text-primary"></i>
+                                </div>
+                                <div>
+                                    <p class="mb-0 small text-muted">Join Date</p>
+                                    <p class="mb-0">{{ customer.join_date|date:"M d, Y" }}</p>
                                 </div>
                             </div>
                         </div>
@@ -208,7 +258,7 @@
                         </div>
                     </div>
                 </div>
-                                    <!-- Notes Section -->
+                <!-- Notes Section -->
                     <div class="mt-4">
                         <h6 class="fw-bold mb-3">
                             <i class="bi bi-card-text text-primary me-2"></i>
