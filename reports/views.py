@@ -23,20 +23,23 @@ def monthly_payment_report(request):
     # Default to current year if not specified
     year = int(request.GET.get('year', timezone.now().year))
     
-    # Get monthly totals
+    # Get monthly totals by the month the payment is FOR (month_for),
+    # matching the onboarding rule: payment is collected before service
+    # for the billing month. Back-payments for earlier months count
+    # toward their own month, not the month the cash was received.
     monthly_data = (
         Payment.objects
-        .filter(payment_date__year=year)
-        .values('payment_date__month')
+        .filter(month_for__year=year)
+        .values('month_for__month')
         .annotate(total=Sum('amount'))
-        .order_by('payment_date__month')
+        .order_by('month_for__month')
     )
     
     # Format data for chart
     months = [calendar.month_name[i] for i in range(1, 13)]
     monthly_totals = [0] * 12
     for data in monthly_data:
-        monthly_totals[data['payment_date__month'] - 1] = float(data['total'])
+        monthly_totals[data['month_for__month'] - 1] = float(data['total'])
     
     year_range = list(range(2020, timezone.now().year + 1))  # or any range you want
 
@@ -123,7 +126,7 @@ def customer_growth_report(request):
 def revenue_analysis_report(request):
     year = int(request.GET.get('year', timezone.now().year))
 
-    payments = Payment.objects.filter(payment_date__year=year).select_related('customer__service_plan')
+    payments = Payment.objects.filter(month_for__year=year).select_related('customer__service_plan')
 
     revenue_by_plan = defaultdict(float)
     for payment in payments:

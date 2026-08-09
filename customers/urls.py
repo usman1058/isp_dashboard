@@ -55,6 +55,7 @@ urlpatterns = [
     path('reports/customer-growth/', customer_growth_report, name='customer_growth_report'),
     path('reports/revenue-analysis/', revenue_analysis_report, name='revenue_analysis_report'),
     path('download-backup/', download_latest_db, name='download_backup'),
+    path('backup/', create_backup, name='create_backup'),
     
     # Bulk operations
     path('customers/bulk-status/', BulkStatusUpdateView.as_view(), name='bulk_status_update'),

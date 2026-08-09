@@ -326,6 +326,7 @@ class CustomerDetailView(PermissionRequiredMixin, DetailView):
                     'amount': customer.service_plan.price,
                     'payment_date': payment_date,
                     'action_url': action_url,
+                    'slip_url': reverse('payment_challan', kwargs={'pk': payment.pk}) if payment else None,
                 })
 
 
@@ -370,7 +371,7 @@ from .models import Customer
 
 
 @login_required
-@permission_required_with_redirect('customers.edit_payment')
+@permission_required_with_redirect('customers.view_payment')
 def payment_status_view(request):
     today = date.today()
     selected_month = request.GET.get('month')
@@ -382,16 +383,39 @@ def payment_status_view(request):
         month = today.month
 
     payments_done = Payment.objects.filter(month_for__year=year, month_for__month=month)
-    payments_done_customers = payments_done.values_list('customer_id', flat=True)
 
-    unpaid_customers = Customer.objects.exclude(id__in=payments_done_customers).filter(service_plan__isnull=False)
+    # Map customer_id -> set of already-paid months (first day of each month)
+    paid_months = {}
+    for customer_id, paid_month in Payment.objects.values_list('customer_id', 'month_for'):
+        paid_months.setdefault(customer_id, set()).add(paid_month.replace(day=1))
+
+    customers = Customer.objects.filter(service_plan__isnull=False).select_related('service_plan')
+    selected_first = date(year, month, 1)
 
     unpaid_prepared = []
-    for customer in unpaid_customers:
+    for customer in customers:
+        if not customer.service_installation_date:
+            continue
+
+        # Find the oldest unpaid month up to the selected month.
+        # Customers installed after the selected month get no pending month,
+        # so new connections won't show up in earlier months.
+        pending_month = None
+        current_month = customer.service_installation_date.replace(day=1)
+        customer_paid_months = paid_months.get(customer.pk, set())
+        while current_month <= selected_first:
+            if current_month not in customer_paid_months:
+                pending_month = current_month
+                break
+            current_month += relativedelta(months=1)
+
+        if pending_month is None:
+            continue
+
         unpaid_prepared.append({
             'customer': customer,
             'amount': customer.service_plan.price,
-            'month_for': date(year, month, 1)
+            'month_for': pending_month,
         })
 
     return render(request, 'customers/payment_status.html', {
@@ -576,9 +600,7 @@ from datetime import timedelta
 from django.core.paginator import Paginator
 
 @login_required
-@permission_required_with_redirect('customer.view_dashboard')
-@login_required
-@permission_required_with_redirect('customer.view_dashboard')
+@permission_required_with_redirect('customers.view_dashboard')
 def dashboard(request):
     today = timezone.now().date()
     year = today.year
@@ -959,6 +981,33 @@ def download_latest_db(request):
 
     response = FileResponse(open(db_path, 'rb'), as_attachment=True, filename=filename)
     return response
+
+
+@login_required
+def create_backup(request):
+    """Create a data backup in the format chosen by the customer (Excel/PDF)."""
+    from .backup_service import generate_excel_backup, generate_pdf_backup
+
+    fmt = request.GET.get('format')
+
+    if fmt == 'excel':
+        buffer, filename, _ = generate_excel_backup()
+        response = HttpResponse(
+            buffer,
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        )
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        response.set_cookie('backup_downloaded', '1', max_age=120, path='/')
+        return response
+
+    if fmt == 'pdf':
+        buffer, filename, _ = generate_pdf_backup()
+        response = HttpResponse(buffer, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        response.set_cookie('backup_downloaded', '1', max_age=120, path='/')
+        return response
+
+    return render(request, 'customers/backup.html')
 
 
 from django.shortcuts import render, get_object_or_404, redirect

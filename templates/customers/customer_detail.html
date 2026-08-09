@@ -432,9 +432,17 @@
                                             class="bi bi-{% if record.status == 'Paid' %}pencil{% else %}cash{% endif %} me-1"></i>
                                         {% if record.status == 'Paid' %}Edit{% else %}Pay{% endif %}
                                     </a>
-                                    <button class="btn btn-sm btn-outline-primary hover-scale">
+                                    {% if record.slip_url %}
+                                    <a href="{{ record.slip_url }}" target="_blank"
+                                        class="btn btn-sm btn-outline-primary hover-scale"
+                                        title="{% if record.status == 'Paid' %}Payment Slip{% else %}Slip{% endif %}">
+                                        <i class="bi bi-receipt"></i>
+                                    </a>
+                                    {% else %}
+                                    <button class="btn btn-sm btn-outline-primary" disabled title="Slip available after payment">
                                         <i class="bi bi-receipt"></i>
                                     </button>
+                                    {% endif %}
                                 </div>
                             </td>
                         </tr>

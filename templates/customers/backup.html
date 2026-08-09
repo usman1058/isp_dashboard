@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Backup{% endblock %}
+
+{% block content %}
+<div class="container animate__animated animate__fadeIn">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="fw-bold text-dark">
+            <i class="bi bi-file-earmark-arrow-down text-primary me-2"></i>
+            Create Backup
+        </h1>
+    </div>
+
+    <div class="alert alert-info d-flex align-items-center">
+        <i class="bi bi-info-circle-fill me-2"></i>
+        <span>Download a snapshot of all customers, payments, plans, expenses and reminders. Choose your format below.</span>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-lg h-100 text-center animate__animated animate__fadeInUp">
+                <div class="card-body py-5">
+                    <div class="icon-circle bg-success bg-opacity-10 text-success mx-auto">
+                        <i class="bi bi-file-earmark-spreadsheet" style="font-size: 3rem;"></i>
+                    </div>
+                    <h4 class="fw-bold mt-4 mb-2">Excel Backup</h4>
+                    <p class="text-muted px-3">One .xlsx file with a separate sheet for each record type — easy to filter, sort and analyze.</p>
+                    <a href="{% url 'create_backup' %}?format=excel"
+                       class="btn btn-lg btn-success rounded-pill px-4 shadow-sm backup-download">
+                        <i class="bi bi-download me-2"></i> Download Excel
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-lg h-100 text-center animate__animated animate__fadeInUp animate__delay-1s">
+                <div class="card-body py-5">
+                    <div class="icon-circle bg-danger bg-opacity-10 text-danger mx-auto">
+                        <i class="bi bi-file-earmark-pdf" style="font-size: 3rem;"></i>
+                    </div>
+                    <h4 class="fw-bold mt-4 mb-2">PDF Backup</h4>
+                    <p class="text-muted px-3">A printable .pdf report with all records laid out in tables — ideal for records and archiving.</p>
+                    <a href="{% url 'create_backup' %}?format=pdf"
+                       class="btn btn-lg btn-danger rounded-pill px-4 shadow-sm backup-download">
+                        <i class="bi bi-download me-2"></i> Download PDF
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loader overlay shown while the backup is being generated -->
+<div id="backup-loader" class="backup-loader d-none">
+    <div class="backup-loader-content">
+        <div class="spinner-border text-light backup-spinner" role="status"></div>
+        <h5 class="text-white mt-4 mb-1">Preparing your backup...</h5>
+        <small class="text-white-50">This may take a few seconds. Your download will start automatically.</small>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<style>
+    .icon-circle {
+        width: 90px;
+        height: 90px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+    }
+
+    .backup-loader {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        background: rgba(10, 20, 40, 0.72);
+        backdrop-filter: blur(3px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .backup-loader-content {
+        text-align: center;
+        padding: 2rem 3rem;
+        border-radius: 1rem;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .backup-spinner {
+        width: 3.5rem;
+        height: 3.5rem;
+        border-width: 0.35rem;
+    }
+</style>
+<script>
+    (function () {
+        var loader = document.getElementById('backup-loader');
+
+        function showLoader() { loader.classList.remove('d-none'); }
+        function hideLoader() { loader.classList.add('d-none'); }
+
+        function clearCookie() {
+            document.cookie = 'backup_downloaded=; Max-Age=0; path=/';
+        }
+
+        function isDownloadDone() {
+            return document.cookie.split(';').some(function (c) {
+                return c.trim().indexOf('backup_downloaded=1') === 0;
+            });
+        }
+
+        document.querySelectorAll('.backup-download').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                clearCookie();
+                showLoader();
+                var start = Date.now();
+
+                var poll = setInterval(function () {
+                    if (isDownloadDone()) {
+                        clearInterval(poll);
+                        clearCookie();
+                        setTimeout(hideLoader, 500);
+                    } else if (Date.now() - start > 60000) {
+                        clearInterval(poll);
+                        hideLoader();
+                        showToast('Download is taking too long. If it did not start, please try again.', 'danger');
+                    }
+                }, 500);
+            });
+        });
+    })();
+</script>
+{% endblock %}

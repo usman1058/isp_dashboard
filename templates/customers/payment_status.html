@@ -42,7 +42,7 @@
                             <tbody>
                                 {% for payment in payments_done %}
                                 <tr>
-                                    <td>{{ payment.customer }}</td>
+                                    <td>{{ payment.customer.username }} - {{ payment.customer.first_name }} {{ payment.customer.last_name }}</td>
                                     <td class="fw-bold text-success">Rs.{{ payment.amount }}</td>
                                     <td>{{ payment.payment_date|date:"M d, Y" }}</td>
                                     <td>{{ payment.get_method_display }}</td>
@@ -88,7 +88,7 @@
                             <tbody>
                                 {% for entry in unpaid_data %}
                                 <tr>
-                                    <td>{{ entry.customer }}</td>
+                                    <td>{{ entry.customer.username }} - {{ entry.customer.first_name }} {{ entry.customer.last_name }}</td>
                                     <td class="fw-bold text-danger">Rs.{{ entry.amount }}</td>
                                     <td>{{ entry.month_for|date:"F Y" }}</td>
                                     <td>
