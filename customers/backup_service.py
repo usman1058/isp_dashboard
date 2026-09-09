@@ -182,6 +182,10 @@ def collect_monthly_report_data(year, month):
         )
         return data, today
 
+    # Map payment method to just Cash or Bank
+    def map_method(m):
+        return 'Bank' if m in ('bank', 'card', 'mobile') else 'Cash'
+
     _collect_section(
         data,
         'Monthly Payment Report',
@@ -194,7 +198,7 @@ def collect_monthly_report_data(year, month):
                 p.month_for.strftime('%d %b %Y'),
                 float(p.amount),
                 build_area(p.customer),
-                p.get_method_display(),
+                map_method(p.method),
                 p.payment_date.strftime('%d %b %Y') if p.payment_date else '—',
                 p.received_by.username if p.received_by else '—'
             )
@@ -225,6 +229,26 @@ def collect_monthly_report_data(year, month):
                     c.status
                 )
                 for c in unpaid_customers
+            ],
+        )
+
+    # Add payment method summary — mapped to just Cash or Bank
+    def map_method(m):
+        return 'Bank' if m in ('bank', 'card', 'mobile') else 'Cash'
+
+    method_totals = {}
+    for p in payments:
+        method = map_method(p.method)
+        method_totals[method] = method_totals.get(method, 0) + float(p.amount)
+
+    if method_totals:
+        _collect_section(
+            data,
+            'Payment Method Summary',
+            ['Method', 'Total Amount', 'Transaction Count'],
+            [
+                (method, total, sum(1 for p in payments if map_method(p.method) == method))
+                for method, total in method_totals.items()
             ],
         )
 
