@@ -18,12 +18,12 @@ from .models import (
 )
 
 
-def _collect_section(data, headers, rows, filter_row=None):
-    """Append a named section (headers + rows) to the backup data dict."""
+def _collect_section(data, title, headers, rows, filter_row=None):
+    """Append a named section (title + headers + rows) to the backup data dict."""
     if filter_row:
         rows = [r for r in rows if filter_row(r)]
     data.append({
-        'title': headers[0] if headers else 'Data',
+        'title': title,
         'headers': headers,
         'rows': rows,
     })
@@ -36,7 +36,8 @@ def collect_backup_data():
 
     _collect_section(
         data,
-        ['Customers', 'Username', 'First Name', 'Last Name', 'Join Date', 'Phone',
+        'Customers',
+        ['Username', 'First Name', 'Last Name', 'Join Date', 'Phone',
          'Area', 'Street', 'St#', 'House#', 'Modem', 'Plan', 'Install Date',
          'Status', 'Notes', 'Created At', 'Updated At'],
         [
@@ -53,13 +54,15 @@ def collect_backup_data():
 
     _collect_section(
         data,
-        ['Service Plans', 'Name', 'Speed', 'Price', 'Active'],
+        'Service Plans',
+        ['Name', 'Speed', 'Price', 'Active'],
         [(p.name, p.speed, float(p.price), 'Yes' if p.is_active else 'No') for p in ServicePlan.objects.all()],
     )
 
     _collect_section(
         data,
-        ['Payments', 'Invoice', 'Customer', 'Amount', 'Payment Date', 'Month For',
+        'Payments',
+        ['Invoice', 'Customer', 'Amount', 'Payment Date', 'Month For',
          'Method', 'Received By', 'Notes'],
         [
             (p.invoice_number, p.customer.username, float(p.amount),
@@ -71,13 +74,15 @@ def collect_backup_data():
 
     _collect_section(
         data,
-        ['Expense Categories', 'Name'],
+        'Expense Categories',
+        ['Name'],
         [(c.name,) for c in ExpenseCategory.objects.all()],
     )
 
     _collect_section(
         data,
-        ['Expenses', 'Category', 'Description', 'Amount', 'Date'],
+        'Expenses',
+        ['Category', 'Description', 'Amount', 'Date'],
         [
             (e.category.name, e.description or '', float(e.amount),
              e.date.isoformat())
@@ -87,7 +92,8 @@ def collect_backup_data():
 
     _collect_section(
         data,
-        ['Reminders', 'Customer', 'Due Date', 'Type', 'Scheduled', 'Status', 'Message'],
+        'Reminders',
+        ['Customer', 'Due Date', 'Type', 'Scheduled', 'Status', 'Message'],
         [
             (r.customer.username, r.due_date.isoformat(), r.get_reminder_type_display(),
              r.scheduled_time.isoformat(), r.status, r.message or '')
@@ -97,7 +103,8 @@ def collect_backup_data():
 
     _collect_section(
         data,
-        ['Reminder Schedule', 'Customer', 'Due Date', 'Send Time', 'Message', 'Sent'],
+        'Reminder Schedule',
+        ['Customer', 'Due Date', 'Send Time', 'Message', 'Sent'],
         [
             (r.customer.username, r.due_date.isoformat(), r.send_time.isoformat(),
              r.message, 'Yes' if r.sent else 'No')
@@ -107,7 +114,8 @@ def collect_backup_data():
 
     _collect_section(
         data,
-        ['WhatsApp Messages', 'Customer', 'Message', 'Timestamp', 'Status'],
+        'WhatsApp Messages',
+        ['Customer', 'Message', 'Timestamp', 'Status'],
         [
             (m.customer.username, m.message, m.timestamp.isoformat(), m.status)
             for m in WhatsAppMessage.objects.select_related('customer').all()
@@ -116,7 +124,8 @@ def collect_backup_data():
 
     _collect_section(
         data,
-        ['Payment Dues', 'Customer', 'Due Date', 'Amount', 'Paid'],
+        'Payment Dues',
+        ['Customer', 'Due Date', 'Amount', 'Paid'],
         [
             (d.customer.username, d.due_date.isoformat(), float(d.amount),
              'Yes' if d.is_paid else 'No')
@@ -126,7 +135,8 @@ def collect_backup_data():
 
     _collect_section(
         data,
-        ['Payment Reminders', 'Customer', 'Due Date', 'Type', 'Sent At', 'Sent'],
+        'Payment Reminders',
+        ['Customer', 'Due Date', 'Type', 'Sent At', 'Sent'],
         [
             (r.customer.username, r.due_date.isoformat(), r.get_reminder_type_display(),
              r.sent_at.isoformat() if r.sent_at else '', 'Yes' if r.is_sent else 'No')
@@ -165,7 +175,8 @@ def collect_monthly_report_data(year, month):
         # Still create an empty section so the file has the header row
         _collect_section(
             data,
-            ['Monthly Payment Report', 'Client Name', 'Username', 'Billing Date',
+            'Monthly Payment Report',
+            ['Client Name', 'Username', 'Billing Date',
              'Amount', 'Area', 'Payment Method', 'Payment Date', 'Received By'],
             [],
         )
@@ -173,7 +184,8 @@ def collect_monthly_report_data(year, month):
 
     _collect_section(
         data,
-        ['Monthly Payment Report', 'Client Name', 'Username', 'Billing Date',
+        'Monthly Payment Report',
+        ['Client Name', 'Username', 'Billing Date',
          'Amount', 'Area', 'Payment Method', 'Payment Date', 'Received By'],
         [
             (
@@ -199,7 +211,8 @@ def collect_monthly_report_data(year, month):
     if unpaid_customers.exists():
         _collect_section(
             data,
-            ['Unpaid Customers (for the month)', 'Client Name', 'Username',
+            'Unpaid Customers (for the month)',
+            ['Client Name', 'Username',
              'Billing Date', 'Expected Amount', 'Area', 'Plan', 'Status'],
             [
                 (
