@@ -49,6 +49,46 @@
             </div>
         </div>
     </div>
+
+    <hr class="my-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-dark mb-0">
+            <i class="bi bi-calendar2-month text-primary me-2"></i>
+            Monthly Payment Report
+        </h2>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form id="monthly-report-form" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label for="report-year" class="form-label fw-semibold">Year</label>
+                    <select name="year" id="report-year" class="form-select">
+                        {% for y in year_range %}
+                        <option value="{{ y }}" {% if y == current_year %}selected{% endif %}>{{ y }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="report-month" class="form-label fw-semibold">Month</label>
+                    <select name="month" id="report-month" class="form-select">
+                        {% for m in months %}
+                        <option value="{{ m.0 }}" {% if m.0 == current_month %}selected{% endif %}>{{ m.1 }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4 d-flex gap-2">
+                    <a href="#" id="monthly-excel" class="btn btn-lg btn-success rounded-pill px-4 shadow-sm backup-download flex-fill">
+                        <i class="bi bi-file-earmark-spreadsheet me-2"></i> Download Excel
+                    </a>
+                    <a href="#" id="monthly-pdf" class="btn btn-lg btn-danger rounded-pill px-4 shadow-sm backup-download flex-fill">
+                        <i class="bi bi-file-earmark-pdf me-2"></i> Download PDF
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
 <!-- Loader overlay shown while the backup is being generated -->
@@ -114,10 +154,13 @@
             });
         }
 
-        document.querySelectorAll('.backup-download').forEach(function (btn) {
-            btn.addEventListener('click', function () {
+        function attachDownload(btn) {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
                 clearCookie();
                 showLoader();
+                var href = this.getAttribute('href');
+                window.location.href = href;
                 var start = Date.now();
 
                 var poll = setInterval(function () {
@@ -132,7 +175,29 @@
                     }
                 }, 500);
             });
-        });
+        }
+
+        document.querySelectorAll('.backup-download').forEach(attachDownload);
+
+        // Monthly report: construct URL with selected year/month
+        var monthlyForm = document.getElementById('monthly-report-form');
+        var excelBtn = document.getElementById('monthly-excel');
+        var pdfBtn = document.getElementById('monthly-pdf');
+
+        function updateMonthlyHrefs() {
+            var year = document.getElementById('report-year').value;
+            var month = document.getElementById('report-month').value;
+            var base = '{% url "create_backup" %}';
+            excelBtn.href = base + '?format=monthly_excel&year=' + year + '&month=' + month;
+            pdfBtn.href = base + '?format=monthly_pdf&year=' + year + '&month=' + month;
+        }
+
+        if (monthlyForm) {
+            monthlyForm.addEventListener('change', updateMonthlyHrefs);
+            updateMonthlyHrefs();
+            attachDownload(excelBtn);
+            attachDownload(pdfBtn);
+        }
     })();
 </script>
 {% endblock %}

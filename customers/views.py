@@ -983,10 +983,15 @@ def download_latest_db(request):
     return response
 
 
+from django.utils import timezone
+
 @login_required
 def create_backup(request):
-    """Create a data backup in the format chosen by the customer (Excel/PDF)."""
-    from .backup_service import generate_excel_backup, generate_pdf_backup
+    """Create a data backup in the format chosen by the customer (Excel/PDF/Monthly)."""
+    from .backup_service import (
+        generate_excel_backup, generate_pdf_backup,
+        generate_monthly_report_excel, generate_monthly_report_pdf
+    )
 
     fmt = request.GET.get('format')
 
@@ -1007,7 +1012,47 @@ def create_backup(request):
         response.set_cookie('backup_downloaded', '1', max_age=120, path='/')
         return response
 
-    return render(request, 'customers/backup.html')
+    if fmt == 'monthly_excel':
+        try:
+            year = int(request.GET.get('year', timezone.now().year))
+            month = int(request.GET.get('month', timezone.now().month))
+        except ValueError:
+            year, month = timezone.now().year, timezone.now().month
+        buffer, filename, _ = generate_monthly_report_excel(year, month)
+        response = HttpResponse(
+            buffer,
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        )
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        response.set_cookie('backup_downloaded', '1', max_age=120, path='/')
+        return response
+
+    if fmt == 'monthly_pdf':
+        try:
+            year = int(request.GET.get('year', timezone.now().year))
+            month = int(request.GET.get('month', timezone.now().month))
+        except ValueError:
+            year, month = timezone.now().year, timezone.now().month
+        buffer, filename, _ = generate_monthly_report_pdf(year, month)
+        response = HttpResponse(buffer, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        response.set_cookie('backup_downloaded', '1', max_age=120, path='/')
+        return response
+
+    # Pass year range and months for the monthly report form
+    now = timezone.now()
+    year_range = range(now.year - 5, now.year + 2)
+    months = [
+        (1, 'January'), (2, 'February'), (3, 'March'), (4, 'April'),
+        (5, 'May'), (6, 'June'), (7, 'July'), (8, 'August'),
+        (9, 'September'), (10, 'October'), (11, 'November'), (12, 'December'),
+    ]
+    return render(request, 'customers/backup.html', {
+        'year_range': year_range,
+        'months': months,
+        'current_year': now.year,
+        'current_month': now.month,
+    })
 
 
 from django.shortcuts import render, get_object_or_404, redirect
